@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Crown, TrendingUp, Zap } from "lucide-react";
+import { Crown, TrendingUp, Zap, Star, Play } from "lucide-react";
 
 interface PlanCardProps {
   name: string;
@@ -7,16 +7,18 @@ interface PlanCardProps {
   dailyReturn: number;
   totalReturn: number;
   duration: number;
-  icon: "crown" | "trending" | "zap";
+  adsRequired: number;
+  icon: "crown" | "trending" | "zap" | "star";
   featured?: boolean;
   delay?: number;
   onBuy: () => void;
 }
 
-const icons = { crown: Crown, trending: TrendingUp, zap: Zap };
+const icons = { crown: Crown, trending: TrendingUp, zap: Zap, star: Star };
 
-const PlanCard = ({ name, price, dailyReturn, totalReturn, duration, icon, featured, delay = 0, onBuy }: PlanCardProps) => {
+const PlanCard = ({ name, price, dailyReturn, totalReturn, duration, adsRequired, icon, featured, delay = 0, onBuy }: PlanCardProps) => {
   const Icon = icons[icon];
+  const isFree = price === 0;
 
   return (
     <motion.div
@@ -42,9 +44,9 @@ const PlanCard = ({ name, price, dailyReturn, totalReturn, duration, icon, featu
       <h3 className="text-xl font-bold font-heading text-foreground">{name}</h3>
       <div className="mt-4">
         <span className="text-4xl font-bold font-heading gold-gradient-text">
-          {price.toLocaleString()}
+          {isFree ? "Free" : price.toLocaleString()}
         </span>
-        <span className="text-muted-foreground text-sm ml-1">PKR</span>
+        {!isFree && <span className="text-muted-foreground text-sm ml-1">PKR</span>}
       </div>
 
       <div className="mt-6 space-y-3">
@@ -60,6 +62,13 @@ const PlanCard = ({ name, price, dailyReturn, totalReturn, duration, icon, featu
           <span className="text-muted-foreground">Total Return</span>
           <span className="text-primary font-bold">{totalReturn.toLocaleString()} PKR</span>
         </div>
+        <div className="flex justify-between text-sm items-center">
+          <span className="text-muted-foreground">Daily Ads</span>
+          <span className="flex items-center gap-1 text-accent font-semibold">
+            <Play className="w-3 h-3" />
+            {adsRequired} Ads
+          </span>
+        </div>
       </div>
 
       <button
@@ -70,7 +79,7 @@ const PlanCard = ({ name, price, dailyReturn, totalReturn, duration, icon, featu
             : "bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground"
         }`}
       >
-        Buy Plan
+        {isFree ? "Activate Free Plan" : "Buy Plan"}
       </button>
     </motion.div>
   );

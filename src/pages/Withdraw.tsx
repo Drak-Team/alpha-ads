@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Wallet, AlertCircle } from "lucide-react";
+import { Wallet, AlertCircle, Percent } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,9 +11,12 @@ const Withdraw = () => {
   const { toast } = useToast();
   const balance = 1250;
 
+  const num = Number(amount) || 0;
+  const fee = Math.round(num * 0.1);
+  const payout = num - fee;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const num = Number(amount);
     if (num < 500) {
       toast({ title: "Minimum 500 PKR", description: "You need at least 500 PKR to withdraw.", variant: "destructive" });
       return;
@@ -22,7 +25,10 @@ const Withdraw = () => {
       toast({ title: "Insufficient Balance", description: "You don't have enough balance.", variant: "destructive" });
       return;
     }
-    toast({ title: "Withdrawal Requested! ✓", description: "Admin will process your request within 24 hours." });
+    toast({
+      title: "Withdrawal Requested! ✓",
+      description: `₨ ${payout.toLocaleString()} will be sent after admin approval (₨ ${fee} service fee deducted).`,
+    });
     setAmount("");
     setAccount("");
   };
@@ -35,11 +41,7 @@ const Withdraw = () => {
           <p className="text-muted-foreground mt-1">Request a payout to your account</p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-6 mb-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
               <Wallet className="w-6 h-6 text-primary" />
@@ -51,15 +53,10 @@ const Withdraw = () => {
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass-card p-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6">
           <div className="flex items-center gap-2 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
             <AlertCircle className="w-4 h-4 text-primary shrink-0" />
-            <p className="text-xs text-muted-foreground">Minimum withdrawal: 500 PKR. Processed within 24h.</p>
+            <p className="text-xs text-muted-foreground">Minimum withdrawal: 500 PKR. A 10% service fee applies.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -75,6 +72,28 @@ const Withdraw = () => {
                 className="w-full px-4 py-3.5 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
+
+            {/* Fee breakdown */}
+            {num >= 500 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="bg-secondary/50 rounded-xl p-4 space-y-2 border border-border/50"
+              >
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Amount</span>
+                  <span className="text-foreground">₨ {num.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1"><Percent className="w-3 h-3" /> Service Fee (10%)</span>
+                  <span className="text-destructive">- ₨ {fee.toLocaleString()}</span>
+                </div>
+                <div className="border-t border-border/50 pt-2 flex justify-between text-sm font-bold">
+                  <span className="text-foreground">You Receive</span>
+                  <span className="gold-gradient-text">₨ {payout.toLocaleString()}</span>
+                </div>
+              </motion.div>
+            )}
 
             <div>
               <label className="text-sm text-muted-foreground font-medium block mb-2">Payment Method</label>
@@ -101,10 +120,7 @@ const Withdraw = () => {
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-3.5 gold-gradient-bg text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all gold-glow"
-            >
+            <button type="submit" className="w-full py-3.5 gold-gradient-bg text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all gold-glow">
               Submit Withdrawal Request
             </button>
           </form>

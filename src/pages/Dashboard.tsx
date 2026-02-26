@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Wallet, TrendingUp, Crown, Gift, Clock } from "lucide-react";
+import { Wallet, TrendingUp, Crown, Gift, Clock, Play } from "lucide-react";
+import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import StatsCard from "@/components/StatsCard";
 import { useToast } from "@/hooks/use-toast";
@@ -8,18 +9,28 @@ import { useToast } from "@/hooks/use-toast";
 const Dashboard = () => {
   const [claimed, setClaimed] = useState(false);
   const { toast } = useToast();
+  const adsWatched = 4;
+  const adsRequired = 6;
+  const canClaim = adsWatched >= adsRequired;
 
   const handleClaim = () => {
+    if (!canClaim) {
+      toast({
+        title: "Watch Ads First",
+        description: `You need to watch ${adsRequired - adsWatched} more ads before claiming.`,
+        variant: "destructive",
+      });
+      return;
+    }
     setClaimed(true);
     toast({
       title: "Profit Claimed! 💰",
-      description: "120 PKR has been added to your wallet.",
+      description: "60 PKR has been added to your wallet.",
     });
   };
 
   return (
     <DashboardLayout>
-      {/* Welcome */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-heading text-foreground">
           Welcome back, <span className="gold-gradient-text">Investor</span>
@@ -27,10 +38,9 @@ const Dashboard = () => {
         <p className="text-muted-foreground mt-1">Here's your portfolio overview</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard title="Total Balance" value="₨ 1,250" icon={Wallet} trend="+120 today" delay={0} />
-        <StatsCard title="Active Plan" value="Silver VIP" icon={Crown} subtitle="Day 5 of 30" delay={0.1} />
+        <StatsCard title="Total Balance" value="₨ 1,250" icon={Wallet} trend="+60 today" delay={0} />
+        <StatsCard title="Active Plan" value="Silver" icon={Crown} subtitle="Day 5 of 30" delay={0.1} />
         <StatsCard title="Total Earned" value="₨ 600" icon={TrendingUp} trend="+8.5% this week" delay={0.2} />
         <StatsCard title="Referral Bonus" value="₨ 350" icon={Gift} subtitle="3 referrals" delay={0.3} />
       </div>
@@ -50,23 +60,35 @@ const Dashboard = () => {
             <div>
               <h2 className="text-xl font-bold font-heading text-foreground">Daily Profit</h2>
               <p className="text-muted-foreground text-sm">
-                {claimed ? "Come back tomorrow for your next reward!" : "Your daily profit is ready to claim"}
+                {claimed
+                  ? "Come back tomorrow!"
+                  : canClaim
+                  ? "Your daily profit is ready to claim"
+                  : `Watch ${adsRequired - adsWatched} more ads to unlock`}
               </p>
+              {!canClaim && !claimed && (
+                <Link to="/earn" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline">
+                  <Play className="w-3 h-3" /> Go to Watch & Earn
+                </Link>
+              )}
             </div>
           </div>
 
           <div className="text-center md:text-right">
-            <p className="text-3xl font-bold font-heading gold-gradient-text mb-3">₨ 120</p>
+            <p className="text-3xl font-bold font-heading gold-gradient-text mb-1">₨ 60</p>
+            <p className="text-xs text-muted-foreground mb-3">Ads: {adsWatched}/{adsRequired}</p>
             <button
               onClick={handleClaim}
               disabled={claimed}
               className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
                 claimed
                   ? "bg-secondary text-muted-foreground cursor-not-allowed"
-                  : "gold-gradient-bg text-primary-foreground gold-glow pulse-gold hover:opacity-90"
+                  : canClaim
+                  ? "gold-gradient-bg text-primary-foreground gold-glow pulse-gold hover:opacity-90"
+                  : "bg-secondary text-muted-foreground cursor-not-allowed"
               }`}
             >
-              {claimed ? "✓ Claimed Today" : "Claim Daily Profit"}
+              {claimed ? "✓ Claimed Today" : canClaim ? "Claim Daily Profit" : "Ads Required"}
             </button>
           </div>
         </div>
@@ -82,9 +104,9 @@ const Dashboard = () => {
         <h3 className="text-lg font-bold font-heading text-foreground mb-4">Recent Activity</h3>
         <div className="space-y-3">
           {[
-            { action: "Daily Profit Claimed", amount: "+₨ 120", time: "Today", type: "earn" },
-            { action: "Silver VIP Plan Activated", amount: "-₨ 1,200", time: "5 days ago", type: "spend" },
-            { action: "Referral Bonus", amount: "+₨ 120", time: "1 week ago", type: "earn" },
+            { action: "Daily Profit Claimed", amount: "+₨ 60", time: "Today", type: "earn" },
+            { action: "Silver Plan Activated", amount: "-₨ 1,000", time: "5 days ago", type: "spend" },
+            { action: "Referral Bonus (10%)", amount: "+₨ 100", time: "1 week ago", type: "earn" },
             { action: "Signup Bonus", amount: "+₨ 50", time: "2 weeks ago", type: "earn" },
           ].map((item, i) => (
             <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">

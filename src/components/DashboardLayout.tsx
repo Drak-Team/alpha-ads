@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Crown, Wallet, Users, LogOut, Shield, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Crown, Wallet, Users, LogOut, Shield, TrendingUp, Play } from "lucide-react";
 
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/plans", label: "VIP Plans", icon: Crown },
+  { path: "/plans", label: "Plans", icon: Crown },
+  { path: "/earn", label: "Watch & Earn", icon: Play },
   { path: "/withdraw", label: "Withdraw", icon: Wallet },
   { path: "/referral", label: "Referral", icon: Users },
 ];
@@ -48,7 +49,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="p-4 border-t border-border space-y-1">
           <Link
             to="/admin"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+              location.pathname === "/admin"
+                ? "gold-gradient-bg text-primary-foreground shadow-lg gold-glow"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            }`}
           >
             <Shield className="w-5 h-5" />
             Admin Panel
@@ -72,12 +77,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs transition-all ${
+                className={`flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-xs transition-all ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
-                {item.label}
+                <span className="truncate max-w-[48px]">{item.label.split(" ")[0]}</span>
               </Link>
             );
           })}
