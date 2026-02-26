@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { Copy, Users, Gift, Share2 } from "lucide-react";
+import { Copy, Users, Gift, Share2, Link as LinkIcon } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 
 const referrals = [
-  { name: "Ali K.", date: "Jan 15, 2026", bonus: "₨ 120", status: "Credited" },
+  { name: "Ali K.", date: "Jan 15, 2026", bonus: "₨ 100", status: "Credited" },
   { name: "Sara M.", date: "Jan 20, 2026", bonus: "₨ 350", status: "Credited" },
   { name: "Ahmed R.", date: "Feb 01, 2026", bonus: "₨ 0", status: "Pending Deposit" },
 ];
@@ -12,10 +12,16 @@ const referrals = [
 const Referral = () => {
   const { toast } = useToast();
   const code = "VIP-INV-X7K9";
+  const referralLink = `https://vipinvest.pk/auth?mode=signup&ref=${code}`;
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(referralLink);
+    toast({ title: "Link Copied!", description: "Share this link with friends to earn 10% bonus." });
+  };
 
   const copyCode = () => {
     navigator.clipboard.writeText(code);
-    toast({ title: "Copied!", description: "Referral code copied to clipboard" });
+    toast({ title: "Code Copied!", description: "Referral code copied to clipboard." });
   };
 
   return (
@@ -26,23 +32,30 @@ const Referral = () => {
           <p className="text-muted-foreground mt-1">Earn 10% of every friend's first deposit</p>
         </div>
 
-        {/* Referral Code */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-8 mb-6 text-center"
-        >
+        {/* Referral Link */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 mb-6 text-center">
           <div className="w-16 h-16 rounded-2xl gold-gradient-bg flex items-center justify-center mx-auto mb-4 animate-float">
             <Share2 className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h2 className="text-lg font-bold font-heading text-foreground mb-2">Your Referral Code</h2>
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-secondary rounded-xl border border-border">
-            <span className="text-xl font-mono font-bold gold-gradient-text tracking-wider">{code}</span>
-            <button onClick={copyCode} className="text-muted-foreground hover:text-primary transition-colors">
-              <Copy className="w-5 h-5" />
+          <h2 className="text-lg font-bold font-heading text-foreground mb-4">Your Referral Link</h2>
+          
+          {/* Link */}
+          <div className="flex items-center gap-2 p-3 bg-secondary rounded-xl border border-border mb-3">
+            <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-xs text-muted-foreground truncate flex-1 text-left font-mono">{referralLink}</span>
+            <button onClick={copyLink} className="shrink-0 px-3 py-1.5 gold-gradient-bg text-primary-foreground text-xs font-semibold rounded-lg hover:opacity-90 transition-all">
+              Copy
             </button>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">Share this code with friends to earn bonuses</p>
+
+          {/* Code */}
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-secondary rounded-xl border border-border">
+            <span className="text-sm text-muted-foreground">Code:</span>
+            <span className="text-lg font-mono font-bold gold-gradient-text tracking-wider">{code}</span>
+            <button onClick={copyCode} className="text-muted-foreground hover:text-primary transition-colors">
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
         </motion.div>
 
         {/* Stats */}
@@ -54,7 +67,7 @@ const Referral = () => {
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6 text-center">
             <Gift className="w-6 h-6 text-primary mx-auto mb-2" />
-            <p className="text-2xl font-bold font-heading gold-gradient-text">₨ 470</p>
+            <p className="text-2xl font-bold font-heading gold-gradient-text">₨ 450</p>
             <p className="text-xs text-muted-foreground">Total Earned</p>
           </motion.div>
         </div>

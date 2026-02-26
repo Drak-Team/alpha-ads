@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Plans from "./pages/Plans";
+import Earn from "./pages/Earn";
 import Withdraw from "./pages/Withdraw";
 import Referral from "./pages/Referral";
 import Admin from "./pages/Admin";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/plans" element={<Plans />} />
+          <Route path="/earn" element={<Earn />} />
           <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/referral" element={<Referral />} />
           <Route path="/admin" element={<Admin />} />
