@@ -11,8 +11,8 @@ const referrals = [
 
 const Referral = () => {
   const { toast } = useToast();
-  const code = "VIP-INV-X7K9";
-  const referralLink = `https://vipinvest.pk/auth?mode=signup&ref=${code}`;
+  const code = "SAP-INV-X7K9";
+  const referralLink = `https://smartads.pk/auth?mode=signup&ref=${code}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -29,7 +29,7 @@ const Referral = () => {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-heading gold-gradient-text">Referral Program</h1>
-          <p className="text-muted-foreground mt-1">Earn 10% of every friend's first deposit</p>
+          <p className="text-foreground/60 mt-1 font-medium">Earn 10% of every friend's first deposit</p>
         </div>
 
         {/* Referral Link */}
@@ -39,20 +39,18 @@ const Referral = () => {
           </div>
           <h2 className="text-lg font-bold font-heading text-foreground mb-4">Your Referral Link</h2>
           
-          {/* Link */}
           <div className="flex items-center gap-2 p-3 bg-secondary rounded-xl border border-border mb-3">
-            <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-            <span className="text-xs text-muted-foreground truncate flex-1 text-left font-mono">{referralLink}</span>
+            <LinkIcon className="w-4 h-4 text-foreground/50 shrink-0" />
+            <span className="text-xs text-foreground/60 truncate flex-1 text-left font-mono">{referralLink}</span>
             <button onClick={copyLink} className="shrink-0 px-3 py-1.5 gold-gradient-bg text-primary-foreground text-xs font-semibold rounded-lg hover:opacity-90 transition-all">
               Copy
             </button>
           </div>
 
-          {/* Code */}
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-secondary rounded-xl border border-border">
-            <span className="text-sm text-muted-foreground">Code:</span>
+            <span className="text-sm text-foreground/60 font-medium">Code:</span>
             <span className="text-lg font-mono font-bold gold-gradient-text tracking-wider">{code}</span>
-            <button onClick={copyCode} className="text-muted-foreground hover:text-primary transition-colors">
+            <button onClick={copyCode} className="text-foreground/50 hover:text-primary transition-colors">
               <Copy className="w-4 h-4" />
             </button>
           </div>
@@ -63,12 +61,12 @@ const Referral = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6 text-center">
             <Users className="w-6 h-6 text-primary mx-auto mb-2" />
             <p className="text-2xl font-bold font-heading gold-gradient-text">3</p>
-            <p className="text-xs text-muted-foreground">Total Referrals</p>
+            <p className="text-xs text-foreground/60 font-medium">Total Referrals</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6 text-center">
             <Gift className="w-6 h-6 text-primary mx-auto mb-2" />
             <p className="text-2xl font-bold font-heading gold-gradient-text">₨ 450</p>
-            <p className="text-xs text-muted-foreground">Total Earned</p>
+            <p className="text-xs text-foreground/60 font-medium">Total Earned</p>
           </motion.div>
         </div>
 
@@ -79,12 +77,12 @@ const Referral = () => {
             {referrals.map((r, i) => (
               <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-foreground">{r.name}</p>
-                  <p className="text-xs text-muted-foreground">{r.date}</p>
+                  <p className="text-sm font-semibold text-foreground">{r.name}</p>
+                  <p className="text-xs text-foreground/50">{r.date}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-success">{r.bonus}</p>
-                  <p className="text-xs text-muted-foreground">{r.status}</p>
+                  <p className="text-xs text-foreground/50">{r.status}</p>
                 </div>
               </div>
             ))}

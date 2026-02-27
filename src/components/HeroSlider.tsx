@@ -6,7 +6,7 @@ import hero2 from "@/assets/hero-2.jpg";
 import hero3 from "@/assets/hero-3.jpg";
 
 const slides = [
-  { img: hero1, title: "Pakistan's #1 VIP Investment Platform", sub: "Invest smart. Earn daily. Withdraw anytime." },
+  { img: hero1, title: "Smart Ads Pakistan — Invest & Earn Daily", sub: "Watch ads, earn profits. Pakistan's #1 smart investment platform." },
   { img: hero2, title: "Watch Your Wealth Grow", sub: "Up to ₨350/day with our premium VIP plan." },
   { img: hero3, title: "Exclusive VIP Membership", sub: "Join thousands of successful Pakistani investors." },
 ];
@@ -53,20 +53,12 @@ const HeroSlider = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Nav dots */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
-              i === current ? "gold-gradient-bg w-6" : "bg-muted-foreground/40"
-            }`}
-          />
+          <button key={i} onClick={() => setCurrent(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? "gold-gradient-bg w-6" : "bg-muted-foreground/40"}`} />
         ))}
       </div>
 
-      {/* Arrows */}
       <button onClick={() => setCurrent((p) => (p - 1 + slides.length) % slides.length)} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center text-foreground hover:bg-background/80 transition-colors">
         <ChevronLeft className="w-5 h-5" />
       </button>

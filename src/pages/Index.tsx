@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Shield, Crown, Users, ArrowRight, Sparkles, ChevronRight, MessageCircle } from "lucide-react";
+import { Shield, Crown, Users, ArrowRight, Sparkles, MessageCircle, Zap } from "lucide-react";
 import HeroSlider from "@/components/HeroSlider";
 import LiveProofs from "@/components/LiveProofs";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -18,9 +18,9 @@ const Index = () => (
     <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 border-b border-border/30">
       <Link to="/" className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center">
-          <Crown className="w-5 h-5 text-primary-foreground" />
+          <Zap className="w-5 h-5 text-primary-foreground" />
         </div>
-        <span className="text-xl font-bold font-heading gold-gradient-text">Pakistan VIP</span>
+        <span className="text-xl font-bold font-heading gold-gradient-text">Smart Ads Pakistan</span>
       </Link>
       <div className="flex items-center gap-3">
         <Link to="/auth" className="px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Login</Link>
@@ -45,7 +45,7 @@ const Index = () => (
 
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }} className="text-4xl md:text-6xl font-black font-heading leading-tight">
           <span className="text-foreground">Welcome to</span><br />
-          <span className="gold-gradient-text">Pakistan VIP</span>
+          <span className="gold-gradient-text">Smart Ads Pakistan</span>
         </motion.h1>
 
         <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -56,7 +56,7 @@ const Index = () => (
           <Link to="/auth?mode=signup" className="group flex items-center gap-2 px-8 py-4 gold-gradient-bg text-primary-foreground font-semibold rounded-2xl hover:opacity-90 transition-all gold-glow pulse-gold">
             Start Investing <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <a href="https://chat.whatsapp.com/your-channel-link" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-8 py-4 bg-[hsl(142_71%_45%)] text-[hsl(0_0%_100%)] font-semibold rounded-2xl hover:opacity-90 transition-all">
+          <a href="https://whatsapp.com/channel/0029VbC0B8W0lwgqZKuScy0T" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-8 py-4 bg-[hsl(142_71%_45%)] text-[hsl(0_0%_100%)] font-semibold rounded-2xl hover:opacity-90 transition-all">
             <MessageCircle className="w-5 h-5" /> Join WhatsApp
           </a>
         </motion.div>
@@ -77,7 +77,7 @@ const Index = () => (
     <section className="px-6 md:px-12 py-20 border-t border-border/30">
       <div className="max-w-5xl mx-auto">
         <motion.h2 initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-3xl md:text-4xl font-bold font-heading text-center mb-16">
-          Why Choose <span className="gold-gradient-text">Pakistan VIP</span>
+          Why Choose <span className="gold-gradient-text">Smart Ads Pakistan</span>
         </motion.h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {features.map((f, i) => (
@@ -98,7 +98,7 @@ const Index = () => (
 
     {/* Footer */}
     <footer className="px-6 md:px-12 py-8 border-t border-border/30 text-center">
-      <p className="text-sm text-muted-foreground">© 2026 Pakistan VIP. All rights reserved.</p>
+      <p className="text-sm text-muted-foreground">© 2026 Smart Ads Pakistan. All rights reserved.</p>
     </footer>
 
     <WhatsAppFloat />

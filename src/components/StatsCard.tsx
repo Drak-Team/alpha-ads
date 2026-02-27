@@ -20,11 +20,11 @@ const StatsCard = ({ title, value, icon: Icon, subtitle, trend, delay = 0 }: Sta
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-muted-foreground font-medium">{title}</p>
+          <p className="text-sm text-foreground/70 font-semibold">{title}</p>
           <p className="text-2xl font-bold mt-1 font-heading gold-gradient-text">{value}</p>
-          {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-foreground/60 mt-1 font-medium">{subtitle}</p>}
           {trend && (
-            <p className="text-xs text-success mt-1 font-medium">
+            <p className="text-xs text-success mt-1 font-semibold">
               {trend}
             </p>
           )}

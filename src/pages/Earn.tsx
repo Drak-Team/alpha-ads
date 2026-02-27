@@ -5,16 +5,56 @@ import DashboardLayout from "@/components/DashboardLayout";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { useToast } from "@/hooks/use-toast";
 
-const TOTAL_ADS = 6; // Changes per plan in production
+const TOTAL_ADS = 6;
 const AD_DURATION = 30;
+
+// Get Pakistan midnight reset time
+const getPKTMidnight = (): number => {
+  const now = new Date();
+  const pktOffset = 5 * 60; // PKT = UTC+5
+  const utcMins = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const pktMins = utcMins + pktOffset;
+  const pktDate = new Date(now);
+  if (pktMins >= 1440) pktDate.setUTCDate(pktDate.getUTCDate() + 1);
+  pktDate.setUTCHours(24 - 5, 0, 0, 0); // midnight PKT = 19:00 UTC
+  if (pktDate.getTime() <= now.getTime()) pktDate.setUTCDate(pktDate.getUTCDate() + 1);
+  return pktDate.getTime();
+};
 
 const Earn = () => {
   const { toast } = useToast();
-  const [completedAds, setCompletedAds] = useState(0);
+  const [completedAds, setCompletedAds] = useState(() => {
+    const saved = localStorage.getItem("sap_ads");
+    if (saved) {
+      const { count, resetAt } = JSON.parse(saved);
+      if (Date.now() < resetAt) return count;
+    }
+    return 0;
+  });
   const [isWatching, setIsWatching] = useState(false);
   const [timeLeft, setTimeLeft] = useState(AD_DURATION);
   const [isVisible, setIsVisible] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Persist ads count with midnight PKT reset
+  useEffect(() => {
+    localStorage.setItem("sap_ads", JSON.stringify({ count: completedAds, resetAt: getPKTMidnight() }));
+  }, [completedAds]);
+
+  // Check for midnight reset
+  useEffect(() => {
+    const check = setInterval(() => {
+      const saved = localStorage.getItem("sap_ads");
+      if (saved) {
+        const { resetAt } = JSON.parse(saved);
+        if (Date.now() >= resetAt) {
+          setCompletedAds(0);
+          localStorage.setItem("sap_ads", JSON.stringify({ count: 0, resetAt: getPKTMidnight() }));
+        }
+      }
+    }, 30000);
+    return () => clearInterval(check);
+  }, []);
 
   const handleVisibilityChange = useCallback(() => setIsVisible(!document.hidden), []);
 
@@ -60,23 +100,29 @@ const Earn = () => {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold font-heading gold-gradient-text">Daily Claim</h1>
-          <p className="text-muted-foreground mt-1">Watch ads to unlock your daily profit</p>
+          <p className="text-foreground/60 mt-1 font-medium">Watch ads to unlock your daily profit</p>
         </div>
 
         {/* Progress */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 mb-6">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-foreground">Today's Progress</p>
+            <p className="text-sm font-semibold text-foreground">Today's Progress</p>
             <p className="text-sm font-bold gold-gradient-text">{completedAds}/{TOTAL_ADS} Ads</p>
           </div>
           <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
             <motion.div className="h-full gold-gradient-bg rounded-full" initial={{ width: 0 }} animate={{ width: `${(completedAds / TOTAL_ADS) * 100}%` }} transition={{ duration: 0.5 }} />
           </div>
           {completedAds >= TOTAL_ADS && (
-            <div className="flex items-center gap-2 mt-3 text-success text-sm">
+            <div className="flex items-center gap-2 mt-3 text-success text-sm font-semibold">
               <CheckCircle className="w-4 h-4" /> All ads completed! Daily profit unlocked.
             </div>
           )}
+        </motion.div>
+
+        {/* Midnight reset notice */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 mb-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
+          <Clock className="w-4 h-4 text-primary shrink-0" />
+          <p className="text-xs text-foreground/60 font-medium">Ad count resets daily at <strong className="text-foreground">12:00 AM Pakistan Time (PKT)</strong></p>
         </motion.div>
 
         {/* Ad Container */}
@@ -88,15 +134,14 @@ const Earn = () => {
                 <div className="text-center relative z-10">
                   <Eye className="w-12 h-12 text-primary mx-auto mb-3 animate-pulse" />
                   <p className="text-foreground font-heading font-bold text-lg">Ad Playing</p>
-                  <p className="text-muted-foreground text-sm mt-1">Stay on this page to earn</p>
+                  <p className="text-foreground/60 text-sm mt-1 font-medium">Stay on this page to earn</p>
                 </div>
-                {/* Real ad container */}
                 <div id="ad-container" className="absolute inset-0 z-20" />
               </div>
               <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 text-primary"><Clock className="w-4 h-4" /><span className="text-sm font-medium">{timeLeft}s remaining</span></div>
-                  <div className="flex items-center gap-1 text-xs text-destructive"><AlertTriangle className="w-3 h-3" /> Don't leave this page</div>
+                  <div className="flex items-center gap-2 text-primary"><Clock className="w-4 h-4" /><span className="text-sm font-bold">{timeLeft}s remaining</span></div>
+                  <div className="flex items-center gap-1 text-xs text-destructive font-semibold"><AlertTriangle className="w-3 h-3" /> Don't leave this page</div>
                 </div>
                 <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
                   <motion.div className="h-full gold-gradient-bg rounded-full" style={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
@@ -109,7 +154,7 @@ const Earn = () => {
                 <>
                   <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
                   <h3 className="text-xl font-bold font-heading text-foreground">All Done for Today!</h3>
-                  <p className="text-muted-foreground text-sm mt-2">Come back tomorrow for more ads.</p>
+                  <p className="text-foreground/60 text-sm mt-2 font-medium">Come back tomorrow for more ads.</p>
                 </>
               ) : (
                 <>
@@ -117,7 +162,7 @@ const Earn = () => {
                     <Play className="w-10 h-10 text-primary-foreground" />
                   </div>
                   <h3 className="text-xl font-bold font-heading text-foreground mb-2">Watch Ad #{completedAds + 1}</h3>
-                  <p className="text-muted-foreground text-sm mb-6">Watch a 30-second ad to progress. Timer resets if you leave.</p>
+                  <p className="text-foreground/60 text-sm mb-6 font-medium">Watch a 30-second ad to progress. Timer resets if you leave.</p>
                   <button onClick={startAd} className="px-8 py-3.5 gold-gradient-bg text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all gold-glow pulse-gold">
                     Start Watching
                   </button>

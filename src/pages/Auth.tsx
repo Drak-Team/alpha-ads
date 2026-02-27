@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useSearchParams } from "react-router-dom";
-import { Crown, Mail, Lock, User, Users, ArrowRight, Eye, EyeOff, Phone } from "lucide-react";
+import { Zap, Mail, Lock, User, Users, ArrowRight, Eye, EyeOff, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sanitize, isValidEmail, isStrongPassword, isValidPhone, checkRateLimit } from "@/lib/validation";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -54,9 +54,9 @@ const Auth = () => {
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/8 blur-[100px]" />
         <div className="relative text-center px-12">
           <div className="w-20 h-20 rounded-2xl gold-gradient-bg flex items-center justify-center mx-auto mb-8 animate-float">
-            <Crown className="w-10 h-10 text-primary-foreground" />
+            <Zap className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h2 className="text-4xl font-black font-heading gold-gradient-text">Pakistan VIP</h2>
+          <h2 className="text-4xl font-black font-heading gold-gradient-text">Smart Ads Pakistan</h2>
           <p className="mt-4 text-muted-foreground max-w-sm mx-auto">Premium investment platform. Invest smart, earn daily.</p>
         </div>
       </div>
@@ -66,9 +66,9 @@ const Auth = () => {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-3 mb-10">
             <div className="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center">
-              <Crown className="w-5 h-5 text-primary-foreground" />
+              <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold font-heading gold-gradient-text">Pakistan VIP</span>
+            <span className="text-xl font-bold font-heading gold-gradient-text">Smart Ads Pakistan</span>
           </div>
 
           <h1 className="text-3xl font-bold font-heading text-foreground">{isSignup ? "Create Account" : "Welcome Back"}</h1>
