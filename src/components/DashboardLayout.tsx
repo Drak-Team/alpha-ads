@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Crown, Wallet, Users, LogOut, Shield, Play } from "lucide-react";
+import { LayoutDashboard, Crown, Wallet, Users, LogOut, Shield, Play, Zap } from "lucide-react";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 const navItems = [
@@ -21,9 +21,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="p-6 border-b border-border">
           <Link to="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center">
-              <Crown className="w-5 h-5 text-primary-foreground" />
+              <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold font-heading gold-gradient-text">Pakistan VIP</span>
+            <span className="text-lg font-bold font-heading gold-gradient-text">Smart Ads PK</span>
           </Link>
         </div>
 

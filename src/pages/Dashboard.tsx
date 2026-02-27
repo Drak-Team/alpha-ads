@@ -34,7 +34,7 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-heading text-foreground">Welcome back, <span className="gold-gradient-text">Investor</span></h1>
-        <p className="text-muted-foreground mt-1">Here's your portfolio overview</p>
+        <p className="text-foreground/60 mt-1 font-medium">Here's your portfolio overview</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -48,7 +48,7 @@ const Dashboard = () => {
       {planDay >= 25 && !planExpired && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-4 mb-6 flex items-center gap-3 border-primary/30 border">
           <Calendar className="w-5 h-5 text-primary shrink-0" />
-          <p className="text-sm text-muted-foreground">Your plan expires in <strong className="text-foreground">{planDuration - planDay} days</strong>. <Link to="/plans" className="text-primary hover:underline">Renew now</Link></p>
+          <p className="text-sm text-foreground/70 font-medium">Your plan expires in <strong className="text-foreground">{planDuration - planDay} days</strong>. <Link to="/plans" className="text-primary hover:underline font-semibold">Renew now</Link></p>
         </motion.div>
       )}
 
@@ -59,17 +59,17 @@ const Dashboard = () => {
             <div className="w-16 h-16 rounded-2xl gold-gradient-bg flex items-center justify-center animate-float"><Clock className="w-8 h-8 text-primary-foreground" /></div>
             <div>
               <h2 className="text-xl font-bold font-heading text-foreground">Daily Profit</h2>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-foreground/60 text-sm font-medium">
                 {claimed ? "Come back tomorrow!" : canClaim ? "Your daily profit is ready to claim" : `Watch ${adsRequired - adsWatched} more ads to unlock`}
               </p>
               {!canClaim && !claimed && (
-                <Link to="/earn" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline"><Play className="w-3 h-3" /> Go to Daily Claim</Link>
+                <Link to="/earn" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline font-semibold"><Play className="w-3 h-3" /> Go to Daily Claim</Link>
               )}
             </div>
           </div>
           <div className="text-center md:text-right">
             <p className="text-3xl font-bold font-heading gold-gradient-text mb-1">₨ 60</p>
-            <p className="text-xs text-muted-foreground mb-3">Ads: {adsWatched}/{adsRequired}</p>
+            <p className="text-xs text-foreground/60 mb-3 font-semibold">Ads: {adsWatched}/{adsRequired}</p>
             <button onClick={handleClaim} disabled={claimed} className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${claimed ? "bg-secondary text-muted-foreground cursor-not-allowed" : canClaim ? "gold-gradient-bg text-primary-foreground gold-glow pulse-gold hover:opacity-90" : "bg-secondary text-muted-foreground cursor-not-allowed"}`}>
               {claimed ? "✓ Claimed Today" : canClaim ? "Claim Daily Profit" : "Ads Required"}
             </button>
@@ -88,7 +88,7 @@ const Dashboard = () => {
             { action: "Signup Bonus", amount: "+₨ 50", time: "2 weeks ago", type: "earn" },
           ].map((item, i) => (
             <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
-              <div><p className="text-sm font-medium text-foreground">{item.action}</p><p className="text-xs text-muted-foreground">{item.time}</p></div>
+              <div><p className="text-sm font-semibold text-foreground">{item.action}</p><p className="text-xs text-foreground/50">{item.time}</p></div>
               <span className={`text-sm font-bold ${item.type === "earn" ? "text-success" : "text-destructive"}`}>{item.amount}</span>
             </div>
           ))}

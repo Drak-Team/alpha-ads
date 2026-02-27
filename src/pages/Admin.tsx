@@ -5,6 +5,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import StatsCard from "@/components/StatsCard";
 import { useToast } from "@/hooks/use-toast";
 
+const ADMIN_PHONE = "03037264598";
+
 type Tab = "deposits" | "withdrawals" | "users";
 
 const deposits = [
@@ -42,7 +44,7 @@ const Admin = () => {
         <Shield className="w-8 h-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold font-heading gold-gradient-text">Admin Panel</h1>
-          <p className="text-muted-foreground text-sm">Manage deposits, withdrawals & users</p>
+          <p className="text-foreground/60 text-sm font-medium">Authorized: {ADMIN_PHONE} • Manage deposits, withdrawals & users</p>
         </div>
       </div>
 
@@ -60,10 +62,10 @@ const Admin = () => {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-2.5 rounded-xl text-sm font-medium capitalize transition-all ${
+            className={`px-5 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all ${
               tab === t
                 ? "gold-gradient-bg text-primary-foreground"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
+                : "bg-secondary text-foreground/60 hover:text-foreground"
             }`}
           >
             {t}
@@ -78,28 +80,27 @@ const Admin = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left p-4 text-muted-foreground font-medium">User</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Plan</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Amount</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Screenshot</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Status</th>
-                  <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">User</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Plan</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Amount</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Screenshot</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Status</th>
+                  <th className="text-right p-4 text-foreground/70 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {deposits.map((d) => (
                   <tr key={d.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="p-4 font-medium text-foreground">{d.user}</td>
-                    <td className="p-4 text-muted-foreground">{d.plan}</td>
+                    <td className="p-4 font-semibold text-foreground">{d.user}</td>
+                    <td className="p-4 text-foreground/70">{d.plan}</td>
                     <td className="p-4 font-semibold gold-gradient-text">₨ {d.amount.toLocaleString()}</td>
                     <td className="p-4">
-                      <button className="flex items-center gap-1 text-xs text-primary hover:underline">
-                        <ImageIcon className="w-3 h-3" />
-                        View
+                      <button className="flex items-center gap-1 text-xs text-primary hover:underline font-semibold">
+                        <ImageIcon className="w-3 h-3" /> View
                       </button>
                     </td>
                     <td className="p-4">
-                      <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${
                         d.status === "pending" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"
                       }`}>
                         {d.status === "pending" ? <Clock className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
@@ -130,25 +131,25 @@ const Admin = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left p-4 text-muted-foreground font-medium">User</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Amount</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Fee (10%)</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Payout</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Method</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Status</th>
-                  <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">User</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Amount</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Fee (10%)</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Payout</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Method</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Status</th>
+                  <th className="text-right p-4 text-foreground/70 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {withdrawals.map((w) => (
                   <tr key={w.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="p-4 font-medium text-foreground">{w.user}</td>
+                    <td className="p-4 font-semibold text-foreground">{w.user}</td>
                     <td className="p-4 text-foreground">₨ {w.amount.toLocaleString()}</td>
-                    <td className="p-4 text-destructive">- ₨ {w.fee.toLocaleString()}</td>
+                    <td className="p-4 text-destructive font-semibold">- ₨ {w.fee.toLocaleString()}</td>
                     <td className="p-4 font-semibold gold-gradient-text">₨ {w.payout.toLocaleString()}</td>
-                    <td className="p-4 text-muted-foreground">{w.method}</td>
+                    <td className="p-4 text-foreground/70">{w.method}</td>
                     <td className="p-4">
-                      <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${
                         w.status === "pending" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"
                       }`}>
                         {w.status === "pending" ? <Clock className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
@@ -179,33 +180,33 @@ const Admin = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left p-4 text-muted-foreground font-medium">Name</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Email</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Plan</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Balance</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Referrals</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Joined</th>
-                  <th className="text-right p-4 text-muted-foreground font-medium">Actions</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Name</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Email</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Plan</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Balance</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Referrals</th>
+                  <th className="text-left p-4 text-foreground/70 font-semibold">Joined</th>
+                  <th className="text-right p-4 text-foreground/70 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => (
                   <tr key={u.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="p-4 font-medium text-foreground">{u.name}</td>
-                    <td className="p-4 text-muted-foreground">{u.email}</td>
+                    <td className="p-4 font-semibold text-foreground">{u.name}</td>
+                    <td className="p-4 text-foreground/70">{u.email}</td>
                     <td className="p-4">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                         u.plan === "VIP" ? "gold-gradient-bg text-primary-foreground" :
                         u.plan === "Gold" ? "bg-primary/10 text-primary" :
                         u.plan === "Silver" ? "bg-accent/10 text-accent" :
-                        "bg-secondary text-muted-foreground"
+                        "bg-secondary text-foreground/60"
                       }`}>{u.plan}</span>
                     </td>
                     <td className="p-4 font-semibold gold-gradient-text">₨ {u.balance.toLocaleString()}</td>
-                    <td className="p-4 text-muted-foreground">{u.referrals}</td>
-                    <td className="p-4 text-muted-foreground">{u.joined}</td>
+                    <td className="p-4 text-foreground/70">{u.referrals}</td>
+                    <td className="p-4 text-foreground/70">{u.joined}</td>
                     <td className="p-4 text-right">
-                      <button className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition-colors">
+                      <button className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground/60 hover:text-foreground transition-colors">
                         <Eye className="w-4 h-4" />
                       </button>
                     </td>
