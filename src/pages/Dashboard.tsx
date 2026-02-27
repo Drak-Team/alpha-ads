@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Wallet, TrendingUp, Crown, Gift, Clock, Play } from "lucide-react";
+import { Wallet, TrendingUp, Crown, Gift, Clock, Play, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import StatsCard from "@/components/StatsCard";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
@@ -12,95 +13,72 @@ const Dashboard = () => {
   const adsWatched = 4;
   const adsRequired = 6;
   const canClaim = adsWatched >= adsRequired;
+  const planDay = 5;
+  const planDuration = 30;
+  const planExpired = planDay > planDuration;
 
   const handleClaim = () => {
+    if (planExpired) {
+      toast({ title: "Plan Expired", description: "Your 30-day plan has ended. Please renew.", variant: "destructive" });
+      return;
+    }
     if (!canClaim) {
-      toast({
-        title: "Watch Ads First",
-        description: `You need to watch ${adsRequired - adsWatched} more ads before claiming.`,
-        variant: "destructive",
-      });
+      toast({ title: "Watch Ads First", description: `Watch ${adsRequired - adsWatched} more ads before claiming.`, variant: "destructive" });
       return;
     }
     setClaimed(true);
-    toast({
-      title: "Profit Claimed! 💰",
-      description: "60 PKR has been added to your wallet.",
-    });
+    toast({ title: "Profit Claimed! 💰", description: "60 PKR has been added to your wallet." });
   };
 
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold font-heading text-foreground">
-          Welcome back, <span className="gold-gradient-text">Investor</span>
-        </h1>
+        <h1 className="text-3xl font-bold font-heading text-foreground">Welcome back, <span className="gold-gradient-text">Investor</span></h1>
         <p className="text-muted-foreground mt-1">Here's your portfolio overview</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatsCard title="Total Balance" value="₨ 1,250" icon={Wallet} trend="+60 today" delay={0} />
-        <StatsCard title="Active Plan" value="Silver" icon={Crown} subtitle="Day 5 of 30" delay={0.1} />
+        <StatsCard title="Active Plan" value="Silver" icon={Crown} subtitle={`Day ${planDay} of ${planDuration}`} delay={0.1} />
         <StatsCard title="Total Earned" value="₨ 600" icon={TrendingUp} trend="+8.5% this week" delay={0.2} />
         <StatsCard title="Referral Bonus" value="₨ 350" icon={Gift} subtitle="3 referrals" delay={0.3} />
       </div>
 
-      {/* Claim Daily Profit */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="glass-card p-8 mb-8"
-      >
+      {/* Plan expiry warning */}
+      {planDay >= 25 && !planExpired && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-4 mb-6 flex items-center gap-3 border-primary/30 border">
+          <Calendar className="w-5 h-5 text-primary shrink-0" />
+          <p className="text-sm text-muted-foreground">Your plan expires in <strong className="text-foreground">{planDuration - planDay} days</strong>. <Link to="/plans" className="text-primary hover:underline">Renew now</Link></p>
+        </motion.div>
+      )}
+
+      {/* Claim */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-card p-8 mb-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl gold-gradient-bg flex items-center justify-center animate-float">
-              <Clock className="w-8 h-8 text-primary-foreground" />
-            </div>
+            <div className="w-16 h-16 rounded-2xl gold-gradient-bg flex items-center justify-center animate-float"><Clock className="w-8 h-8 text-primary-foreground" /></div>
             <div>
               <h2 className="text-xl font-bold font-heading text-foreground">Daily Profit</h2>
               <p className="text-muted-foreground text-sm">
-                {claimed
-                  ? "Come back tomorrow!"
-                  : canClaim
-                  ? "Your daily profit is ready to claim"
-                  : `Watch ${adsRequired - adsWatched} more ads to unlock`}
+                {claimed ? "Come back tomorrow!" : canClaim ? "Your daily profit is ready to claim" : `Watch ${adsRequired - adsWatched} more ads to unlock`}
               </p>
               {!canClaim && !claimed && (
-                <Link to="/earn" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline">
-                  <Play className="w-3 h-3" /> Go to Watch & Earn
-                </Link>
+                <Link to="/earn" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline"><Play className="w-3 h-3" /> Go to Daily Claim</Link>
               )}
             </div>
           </div>
-
           <div className="text-center md:text-right">
             <p className="text-3xl font-bold font-heading gold-gradient-text mb-1">₨ 60</p>
             <p className="text-xs text-muted-foreground mb-3">Ads: {adsWatched}/{adsRequired}</p>
-            <button
-              onClick={handleClaim}
-              disabled={claimed}
-              className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                claimed
-                  ? "bg-secondary text-muted-foreground cursor-not-allowed"
-                  : canClaim
-                  ? "gold-gradient-bg text-primary-foreground gold-glow pulse-gold hover:opacity-90"
-                  : "bg-secondary text-muted-foreground cursor-not-allowed"
-              }`}
-            >
+            <button onClick={handleClaim} disabled={claimed} className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${claimed ? "bg-secondary text-muted-foreground cursor-not-allowed" : canClaim ? "gold-gradient-bg text-primary-foreground gold-glow pulse-gold hover:opacity-90" : "bg-secondary text-muted-foreground cursor-not-allowed"}`}>
               {claimed ? "✓ Claimed Today" : canClaim ? "Claim Daily Profit" : "Ads Required"}
             </button>
           </div>
         </div>
       </motion.div>
 
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="glass-card p-6"
-      >
+      {/* Activity */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card p-6">
         <h3 className="text-lg font-bold font-heading text-foreground mb-4">Recent Activity</h3>
         <div className="space-y-3">
           {[
@@ -110,17 +88,13 @@ const Dashboard = () => {
             { action: "Signup Bonus", amount: "+₨ 50", time: "2 weeks ago", type: "earn" },
           ].map((item, i) => (
             <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
-              <div>
-                <p className="text-sm font-medium text-foreground">{item.action}</p>
-                <p className="text-xs text-muted-foreground">{item.time}</p>
-              </div>
-              <span className={`text-sm font-bold ${item.type === "earn" ? "text-success" : "text-destructive"}`}>
-                {item.amount}
-              </span>
+              <div><p className="text-sm font-medium text-foreground">{item.action}</p><p className="text-xs text-muted-foreground">{item.time}</p></div>
+              <span className={`text-sm font-bold ${item.type === "earn" ? "text-success" : "text-destructive"}`}>{item.amount}</span>
             </div>
           ))}
         </div>
       </motion.div>
+      <WhatsAppFloat />
     </DashboardLayout>
   );
 };
