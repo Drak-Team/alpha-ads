@@ -8,13 +8,14 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
-  const [isSignup, setIsSignup] = useState(searchParams.get("mode") === "signup");
+  const refCode = searchParams.get("ref") || "";
+  const [isSignup, setIsSignup] = useState(searchParams.get("mode") === "signup" || !!refCode);
   const [showPass, setShowPass] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [referral, setReferral] = useState("");
+  const [referral, setReferral] = useState(refCode);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
