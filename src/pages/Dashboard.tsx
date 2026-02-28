@@ -38,10 +38,10 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard title="Total Balance" value="₨ 1,250" icon={Wallet} trend="+60 today" delay={0} />
-        <StatsCard title="Active Plan" value="Silver" icon={Crown} subtitle={`Day ${planDay} of ${planDuration}`} delay={0.1} />
-        <StatsCard title="Total Earned" value="₨ 600" icon={TrendingUp} trend="+8.5% this week" delay={0.2} />
-        <StatsCard title="Referral Bonus" value="₨ 350" icon={Gift} subtitle="3 referrals" delay={0.3} />
+        <StatsCard title="Total Balance" value="₨ 0" icon={Wallet} trend="" delay={0} />
+        <StatsCard title="Active Plan" value="None" icon={Crown} subtitle="No active plan" delay={0.1} />
+        <StatsCard title="Total Earned" value="₨ 0" icon={TrendingUp} trend="" delay={0.2} />
+        <StatsCard title="Referral Bonus" value="₨ 0" icon={Gift} subtitle="0 referrals" delay={0.3} />
       </div>
 
       {/* Plan expiry warning */}
@@ -81,17 +81,7 @@ const Dashboard = () => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card p-6">
         <h3 className="text-lg font-bold font-heading text-foreground mb-4">Recent Activity</h3>
         <div className="space-y-3">
-          {[
-            { action: "Daily Profit Claimed", amount: "+₨ 60", time: "Today", type: "earn" },
-            { action: "Silver Plan Activated", amount: "-₨ 1,000", time: "5 days ago", type: "spend" },
-            { action: "Referral Bonus (10%)", amount: "+₨ 100", time: "1 week ago", type: "earn" },
-            { action: "Signup Bonus", amount: "+₨ 50", time: "2 weeks ago", type: "earn" },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
-              <div><p className="text-sm font-semibold text-foreground">{item.action}</p><p className="text-xs text-foreground/50">{item.time}</p></div>
-              <span className={`text-sm font-bold ${item.type === "earn" ? "text-success" : "text-destructive"}`}>{item.amount}</span>
-            </div>
-          ))}
+          <p className="text-sm text-muted-foreground text-center py-6">No activity yet. Purchase a plan to start earning!</p>
         </div>
       </motion.div>
       <WhatsAppFloat />
