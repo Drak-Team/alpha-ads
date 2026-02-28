@@ -12,7 +12,7 @@ const referrals = [
 const Referral = () => {
   const { toast } = useToast();
   const code = "SAP-INV-X7K9";
-  const referralLink = `https://smartads.pk/auth?mode=signup&ref=${code}`;
+  const referralLink = `${window.location.origin}/auth?mode=signup&ref=${code}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
