@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Shield, Crown, Users, ArrowRight, Sparkles, MessageCircle, Zap } from "lucide-react";
+import { Shield, Crown, Users, ArrowRight, Sparkles, MessageCircle } from "lucide-react";
 import HeroSlider from "@/components/HeroSlider";
 import LiveProofs from "@/components/LiveProofs";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import logo from "@/assets/logo.png";
 
 const features = [
   { icon: Crown, title: "VIP Plans", desc: "Earn up to ₨350/day with premium investment tiers" },
@@ -17,9 +18,7 @@ const Index = () => (
     {/* Navbar */}
     <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 border-b border-border/30">
       <Link to="/" className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl gold-gradient-bg flex items-center justify-center">
-          <Zap className="w-5 h-5 text-primary-foreground" />
-        </div>
+        <img src={logo} alt="Smart Ads Pakistan" className="w-10 h-10 rounded-xl" />
         <span className="text-xl font-bold font-heading gold-gradient-text">Smart Ads Pakistan</span>
       </Link>
       <div className="flex items-center gap-3">
