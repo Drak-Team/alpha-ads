@@ -3,11 +3,7 @@ import { Copy, Users, Gift, Share2, Link as LinkIcon } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 
-const referrals = [
-  { name: "Ali K.", date: "Jan 15, 2026", bonus: "₨ 100", status: "Credited" },
-  { name: "Sara M.", date: "Jan 20, 2026", bonus: "₨ 350", status: "Credited" },
-  { name: "Ahmed R.", date: "Feb 01, 2026", bonus: "₨ 0", status: "Pending Deposit" },
-];
+const referrals: { name: string; date: string; bonus: string; status: string }[] = [];
 
 const Referral = () => {
   const { toast } = useToast();
@@ -60,12 +56,12 @@ const Referral = () => {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6 text-center">
             <Users className="w-6 h-6 text-primary mx-auto mb-2" />
-            <p className="text-2xl font-bold font-heading gold-gradient-text">3</p>
+            <p className="text-2xl font-bold font-heading gold-gradient-text">0</p>
             <p className="text-xs text-foreground/60 font-medium">Total Referrals</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6 text-center">
             <Gift className="w-6 h-6 text-primary mx-auto mb-2" />
-            <p className="text-2xl font-bold font-heading gold-gradient-text">₨ 450</p>
+            <p className="text-2xl font-bold font-heading gold-gradient-text">₨ 0</p>
             <p className="text-xs text-foreground/60 font-medium">Total Earned</p>
           </motion.div>
         </div>
@@ -74,18 +70,22 @@ const Referral = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card p-6">
           <h3 className="text-lg font-bold font-heading text-foreground mb-4">Your Referrals</h3>
           <div className="space-y-3">
-            {referrals.map((r, i) => (
-              <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{r.name}</p>
-                  <p className="text-xs text-foreground/50">{r.date}</p>
+            {referrals.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No referrals yet. Share your link to start earning!</p>
+            ) : (
+              referrals.map((r, i) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{r.name}</p>
+                    <p className="text-xs text-foreground/50">{r.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-success">{r.bonus}</p>
+                    <p className="text-xs text-foreground/50">{r.status}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-success">{r.bonus}</p>
-                  <p className="text-xs text-foreground/50">{r.status}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </motion.div>
       </div>
