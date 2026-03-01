@@ -10,24 +10,30 @@ import { useToast } from "@/hooks/use-toast";
 const Dashboard = () => {
   const [claimed, setClaimed] = useState(false);
   const { toast } = useToast();
-  const adsWatched = 4;
+  const adsWatched = 0;
   const adsRequired = 6;
   const canClaim = adsWatched >= adsRequired;
-  const planDay = 5;
+  const activePlan = ""; // empty = no plan
+  const planDay = 0;
   const planDuration = 30;
-  const planExpired = planDay > planDuration;
+  const planExpired = activePlan ? planDay > planDuration : false;
+  const dailyProfit = activePlan && canClaim ? 60 : 0;
 
   const handleClaim = () => {
     if (planExpired) {
       toast({ title: "Plan Expired", description: "Your 30-day plan has ended. Please renew.", variant: "destructive" });
       return;
     }
+    if (!activePlan) {
+      toast({ title: "No Active Plan", description: "Purchase a plan first to start earning.", variant: "destructive" });
+      return;
+    }
     if (!canClaim) {
-      toast({ title: "Watch Ads First", description: `Watch ${adsRequired - adsWatched} more ads before claiming.`, variant: "destructive" });
+      toast({ title: "Watch ALL Ads First", description: `You must watch ALL ${adsRequired} ads to earn. ${adsWatched}/${adsRequired} completed.`, variant: "destructive" });
       return;
     }
     setClaimed(true);
-    toast({ title: "Profit Claimed! 💰", description: "60 PKR has been added to your wallet." });
+    toast({ title: "Profit Claimed! 💰", description: `${dailyProfit} PKR has been added to your wallet.` });
   };
 
   return (
@@ -60,7 +66,7 @@ const Dashboard = () => {
             <div>
               <h2 className="text-xl font-bold font-heading text-foreground">Daily Profit</h2>
               <p className="text-foreground/60 text-sm font-medium">
-                {claimed ? "Come back tomorrow!" : canClaim ? "Your daily profit is ready to claim" : `Watch ${adsRequired - adsWatched} more ads to unlock`}
+                {!activePlan ? "Purchase a plan to start earning" : claimed ? "Come back tomorrow!" : canClaim ? "Your daily profit is ready to claim" : `Watch ALL ${adsRequired} ads to unlock (${adsWatched}/${adsRequired})`}
               </p>
               {!canClaim && !claimed && (
                 <Link to="/earn" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline font-semibold"><Play className="w-3 h-3" /> Go to Daily Claim</Link>
@@ -68,7 +74,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="text-center md:text-right">
-            <p className="text-3xl font-bold font-heading gold-gradient-text mb-1">₨ 60</p>
+            <p className="text-3xl font-bold font-heading gold-gradient-text mb-1">₨ {dailyProfit}</p>
             <p className="text-xs text-foreground/60 mb-3 font-semibold">Ads: {adsWatched}/{adsRequired}</p>
             <button onClick={handleClaim} disabled={claimed} className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${claimed ? "bg-secondary text-muted-foreground cursor-not-allowed" : canClaim ? "gold-gradient-bg text-primary-foreground gold-glow pulse-gold hover:opacity-90" : "bg-secondary text-muted-foreground cursor-not-allowed"}`}>
               {claimed ? "✓ Claimed Today" : canClaim ? "Claim Daily Profit" : "Ads Required"}

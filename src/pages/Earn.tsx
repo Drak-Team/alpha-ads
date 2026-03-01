@@ -81,9 +81,14 @@ const Earn = () => {
     }
     if (timeLeft === 0 && isWatching) {
       setIsWatching(false);
-      setCompletedAds((p) => p + 1);
+      const newCount = completedAds + 1;
+      setCompletedAds(newCount);
       setTimeLeft(AD_DURATION);
-      toast({ title: "Ad Completed! ✓", description: `${completedAds + 1}/${TOTAL_ADS} ads watched today.` });
+      if (newCount >= TOTAL_ADS) {
+        toast({ title: "All Ads Completed! 💰", description: "You've watched all ads. Your daily profit is now unlocked!" });
+      } else {
+        toast({ title: "Ad Completed! ✓", description: `${newCount}/${TOTAL_ADS} ads watched. Complete ALL ${TOTAL_ADS} to earn today's profit.` });
+      }
     }
   }, [isWatching, isVisible, timeLeft, completedAds, toast]);
 
@@ -112,10 +117,12 @@ const Earn = () => {
           <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
             <motion.div className="h-full gold-gradient-bg rounded-full" initial={{ width: 0 }} animate={{ width: `${(completedAds / TOTAL_ADS) * 100}%` }} transition={{ duration: 0.5 }} />
           </div>
-          {completedAds >= TOTAL_ADS && (
+          {completedAds >= TOTAL_ADS ? (
             <div className="flex items-center gap-2 mt-3 text-success text-sm font-semibold">
               <CheckCircle className="w-4 h-4" /> All ads completed! Daily profit unlocked.
             </div>
+          ) : (
+            <p className="text-xs text-destructive/80 mt-2 font-medium">⚠️ You must watch ALL {TOTAL_ADS} ads to earn. Partial = ₨ 0.</p>
           )}
         </motion.div>
 
