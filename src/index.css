@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    --background: 222 25% 6%;
-    --foreground: 40 20% 92%;
+    --background: 0 0% 100%;
+    --foreground: 150 30% 10%;
 
-    --card: 222 20% 10%;
-    --card-foreground: 40 20% 92%;
+    --card: 150 10% 97%;
+    --card-foreground: 150 30% 10%;
 
-    --popover: 222 20% 10%;
-    --popover-foreground: 40 20% 92%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 30% 10%;
 
-    --primary: 43 96% 56%;
-    --primary-foreground: 222 25% 6%;
+    --primary: 43 96% 50%;
+    --primary-foreground: 150 40% 10%;
 
-    --secondary: 222 18% 16%;
-    --secondary-foreground: 40 20% 85%;
+    --secondary: 150 30% 15%;
+    --secondary-foreground: 40 30% 92%;
 
-    --muted: 222 15% 14%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 150 10% 93%;
+    --muted-foreground: 150 10% 45%;
 
-    --accent: 43 80% 45%;
-    --accent-foreground: 222 25% 6%;
+    --accent: 150 40% 22%;
+    --accent-foreground: 40 90% 60%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -33,26 +33,33 @@
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --border: 222 15% 18%;
-    --input: 222 15% 18%;
-    --ring: 43 96% 56%;
+    --border: 150 10% 88%;
+    --input: 150 10% 88%;
+    --ring: 43 96% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 222 22% 8%;
-    --sidebar-foreground: 40 20% 85%;
-    --sidebar-primary: 43 96% 56%;
-    --sidebar-primary-foreground: 222 25% 6%;
-    --sidebar-accent: 222 18% 14%;
-    --sidebar-accent-foreground: 40 20% 85%;
-    --sidebar-border: 222 15% 16%;
-    --sidebar-ring: 43 96% 56%;
+    --sidebar-background: 150 30% 12%;
+    --sidebar-foreground: 40 20% 90%;
+    --sidebar-primary: 43 96% 50%;
+    --sidebar-primary-foreground: 150 40% 10%;
+    --sidebar-accent: 150 25% 18%;
+    --sidebar-accent-foreground: 40 20% 90%;
+    --sidebar-border: 150 20% 20%;
+    --sidebar-ring: 43 96% 50%;
 
-    --gold-gradient: linear-gradient(135deg, hsl(43 96% 56%), hsl(35 95% 45%));
-    --gold-glow: 0 0 30px hsl(43 96% 56% / 0.3);
-    --card-glow: 0 0 40px hsl(43 96% 56% / 0.08);
+    --royal-green: 150 40% 22%;
+    --royal-green-dark: 150 35% 12%;
+    --gold: 43 96% 50%;
+    --gold-light: 43 90% 65%;
+    --gold-dark: 35 95% 40%;
 
-    --font-heading: 'Playfair Display', serif;
+    --gold-gradient: linear-gradient(135deg, hsl(43 96% 50%), hsl(35 95% 40%));
+    --green-gradient: linear-gradient(135deg, hsl(150 40% 22%), hsl(150 35% 12%));
+    --gold-glow: 0 0 30px hsl(43 96% 50% / 0.3);
+    --card-glow: 0 0 40px hsl(43 96% 50% / 0.08);
+
+    --font-heading: 'Cinzel', serif;
     --font-body: 'Inter', sans-serif;
   }
 }
@@ -82,6 +89,10 @@
     background-image: var(--gold-gradient);
   }
 
+  .green-gradient-bg {
+    background-image: var(--green-gradient);
+  }
+
   .gold-glow {
     box-shadow: var(--gold-glow);
   }
@@ -96,14 +107,22 @@
   }
 
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl;
+    @apply bg-card/80 backdrop-blur-xl border border-border rounded-2xl;
+  }
+
+  .royal-header {
+    background: linear-gradient(135deg, hsl(150 40% 22%), hsl(150 35% 15%));
+  }
+
+  .royal-footer {
+    background: linear-gradient(135deg, hsl(150 35% 12%), hsl(150 40% 18%));
   }
 
   .shimmer {
     background: linear-gradient(
       110deg,
       transparent 25%,
-      hsl(43 96% 56% / 0.08) 37%,
+      hsl(43 96% 50% / 0.06) 37%,
       transparent 63%
     );
     background-size: 200% 100%;
@@ -120,7 +139,7 @@
   }
 
   @keyframes pulse-gold {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(43 96% 56% / 0.4); }
-    50% { box-shadow: 0 0 0 12px hsl(43 96% 56% / 0); }
+    0%, 100% { box-shadow: 0 0 0 0 hsl(43 96% 50% / 0.4); }
+    50% { box-shadow: 0 0 0 12px hsl(43 96% 50% / 0); }
   }
 }

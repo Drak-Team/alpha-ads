@@ -10,7 +10,7 @@ const proofs = [
 ];
 
 const LiveProofs = () => (
-  <section className="px-6 md:px-12 py-20 border-t border-border/30">
+  <section className="px-6 md:px-12 py-20 border-t border-border/30 bg-card/50">
     <div className="max-w-3xl mx-auto">
       <motion.h2
         initial={{ opacity: 0 }}
