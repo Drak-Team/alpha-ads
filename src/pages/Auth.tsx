@@ -41,23 +41,22 @@ const Auth = () => {
 
     toast({
       title: isSignup ? "Account Created! 🎉" : "Welcome Back!",
-      description: isSignup ? "You've received 50 PKR signup bonus!" : "Redirecting to your dashboard...",
+      description: isSignup ? "You've received 11 PKR signup bonus!" : "Redirecting to your dashboard...",
     });
     setTimeout(() => { window.location.href = "/dashboard"; }, 1500);
   };
 
-  const inputCls = "w-full pl-12 pr-4 py-3.5 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all";
+  const inputCls = "w-full pl-12 pr-4 py-3.5 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all";
 
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left */}
-      <div className="hidden lg:flex flex-1 items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-primary/5" />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/8 blur-[100px]" />
+      <div className="hidden lg:flex flex-1 items-center justify-center relative overflow-hidden green-gradient-bg">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[100px]" />
          <div className="relative text-center px-12">
-           <img src={logo} alt="Smart Ads Pakistan" className="w-20 h-20 rounded-2xl mx-auto mb-8 animate-float" />
-           <h2 className="text-4xl font-black font-heading gold-gradient-text">Smart Ads Pakistan</h2>
-           <p className="mt-4 text-muted-foreground max-w-sm mx-auto">Premium investment platform. Invest smart, earn daily.</p>
+           <img src={logo} alt="Alpha Ads & Earn" className="w-20 h-20 rounded-2xl mx-auto mb-8 animate-float" />
+           <h2 className="text-4xl font-black font-heading gold-gradient-text">Alpha Ads & Earn</h2>
+           <p className="mt-4 text-secondary-foreground/70 max-w-sm mx-auto">Premium earning platform. Watch, spin, stake & earn daily.</p>
          </div>
       </div>
 
@@ -65,12 +64,12 @@ const Auth = () => {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
            <div className="lg:hidden flex items-center gap-3 mb-10">
-             <img src={logo} alt="Smart Ads Pakistan" className="w-10 h-10 rounded-xl" />
-             <span className="text-xl font-bold font-heading gold-gradient-text">Smart Ads Pakistan</span>
+             <img src={logo} alt="Alpha Ads & Earn" className="w-10 h-10 rounded-xl" />
+             <span className="text-xl font-bold font-heading gold-gradient-text">Alpha Ads & Earn</span>
            </div>
 
           <h1 className="text-3xl font-bold font-heading text-foreground">{isSignup ? "Create Account" : "Welcome Back"}</h1>
-          <p className="text-muted-foreground mt-2">{isSignup ? "Get 50 PKR bonus on signup!" : "Login to your dashboard"}</p>
+          <p className="text-muted-foreground mt-2">{isSignup ? "Get 11 PKR bonus on signup!" : "Login to your dashboard"}</p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
             {isSignup && (
@@ -104,7 +103,7 @@ const Auth = () => {
             <div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input type={showPass ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-12 py-3.5 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" />
+                <input type={showPass ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-12 py-3.5 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" />
                 <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>

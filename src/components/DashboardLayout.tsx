@@ -18,11 +18,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/40 backdrop-blur-xl">
-        <div className="p-6 border-b border-border">
+      <aside className="hidden md:flex w-64 flex-col border-r border-border green-gradient-bg">
+        <div className="p-6 border-b border-secondary-foreground/10">
           <Link to="/" className="flex items-center gap-3">
-            <img src={logo} alt="Smart Ads Pakistan" className="w-10 h-10 rounded-xl" />
-            <span className="text-lg font-bold font-heading gold-gradient-text">Smart Ads PK</span>
+            <img src={logo} alt="Alpha Ads & Earn" className="w-10 h-10 rounded-xl" />
+            <span className="text-lg font-bold font-heading gold-gradient-text">Alpha Ads</span>
           </Link>
         </div>
 
@@ -36,7 +36,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                   isActive
                     ? "gold-gradient-bg text-primary-foreground shadow-lg gold-glow"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    : "text-secondary-foreground/70 hover:text-secondary-foreground hover:bg-secondary-foreground/5"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -46,13 +46,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border space-y-1">
+        <div className="p-4 border-t border-secondary-foreground/10 space-y-1">
           <Link
             to="/admin"
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
               location.pathname === "/admin"
                 ? "gold-gradient-bg text-primary-foreground shadow-lg gold-glow"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                : "text-secondary-foreground/70 hover:text-secondary-foreground hover:bg-secondary-foreground/5"
             }`}
           >
             <Shield className="w-5 h-5" />
@@ -60,7 +60,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </Link>
           <Link
             to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-secondary-foreground/70 hover:text-secondary-foreground hover:bg-secondary-foreground/5 transition-all"
           >
             <LogOut className="w-5 h-5" />
             Logout
@@ -69,7 +69,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Mobile Nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 green-gradient-bg border-t border-secondary-foreground/10">
         <nav className="flex justify-around p-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -78,7 +78,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 key={item.path}
                 to={item.path}
                 className={`flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-xs transition-all ${
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  isActive ? "text-primary" : "text-secondary-foreground/60"
                 }`}
               >
                 <item.icon className="w-5 h-5" />

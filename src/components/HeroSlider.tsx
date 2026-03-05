@@ -4,11 +4,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import hero1 from "@/assets/hero-1.jpg";
 import hero2 from "@/assets/hero-2.jpg";
 import hero3 from "@/assets/hero-3.jpg";
+import hero4 from "@/assets/hero-4.jpg";
 
 const slides = [
-  { img: hero1, title: "Smart Ads Pakistan — Invest & Earn Daily", sub: "Watch ads, earn profits. Pakistan's #1 smart investment platform." },
-  { img: hero2, title: "Watch Your Wealth Grow", sub: "Up to ₨350/day with our premium VIP plan." },
-  { img: hero3, title: "Exclusive VIP Membership", sub: "Join thousands of successful Pakistani investors." },
+  { img: hero1, title: "Alpha Ads & Earn — Your Daily Income", sub: "Watch ads, earn profits. Pakistan's premier earning platform." },
+  { img: hero2, title: "Watch Your Wealth Grow", sub: "Up to ₨50/day with our premium VIP-2 plan." },
+  { img: hero3, title: "Exclusive VIP Membership", sub: "Join thousands of successful earners today." },
+  { img: hero4, title: "Build Your Network", sub: "Refer friends and earn referral bonuses instantly." },
 ];
 
 const HeroSlider = () => {
@@ -31,7 +33,7 @@ const HeroSlider = () => {
           className="absolute inset-0"
         >
           <img src={slides[current].img} alt={slides[current].title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[hsl(150_35%_12%)] via-[hsl(150_35%_12%/0.6)] to-transparent" />
           <div className="absolute bottom-8 left-8 right-8 md:bottom-12 md:left-12">
             <motion.h2
               initial={{ y: 20, opacity: 0 }}
@@ -45,7 +47,7 @@ const HeroSlider = () => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-muted-foreground mt-2 max-w-md"
+              className="text-secondary-foreground/80 mt-2 max-w-md"
             >
               {slides[current].sub}
             </motion.p>
@@ -55,14 +57,14 @@ const HeroSlider = () => {
 
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {slides.map((_, i) => (
-          <button key={i} onClick={() => setCurrent(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? "gold-gradient-bg w-6" : "bg-muted-foreground/40"}`} />
+          <button key={i} onClick={() => setCurrent(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? "gold-gradient-bg w-6" : "bg-secondary-foreground/40"}`} />
         ))}
       </div>
 
-      <button onClick={() => setCurrent((p) => (p - 1 + slides.length) % slides.length)} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center text-foreground hover:bg-background/80 transition-colors">
+      <button onClick={() => setCurrent((p) => (p - 1 + slides.length) % slides.length)} className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-secondary/60 backdrop-blur-sm flex items-center justify-center text-secondary-foreground hover:bg-secondary/80 transition-colors">
         <ChevronLeft className="w-5 h-5" />
       </button>
-      <button onClick={() => setCurrent((p) => (p + 1) % slides.length)} className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center text-foreground hover:bg-background/80 transition-colors">
+      <button onClick={() => setCurrent((p) => (p + 1) % slides.length)} className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-secondary/60 backdrop-blur-sm flex items-center justify-center text-secondary-foreground hover:bg-secondary/80 transition-colors">
         <ChevronRight className="w-5 h-5" />
       </button>
     </div>
