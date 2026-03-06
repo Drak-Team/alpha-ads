@@ -13,7 +13,7 @@ const Withdraw = () => {
   const [accountError, setAccountError] = useState("");
   const [showFreePlanPopup, setShowFreePlanPopup] = useState(false);
   const { toast } = useToast();
-  const balance = 1250;
+  const balance = 0;
   const currentPlan = "Free"; // mock — would come from user state
   const activatedReferrals = 2; // mock
   const queuePosition = 3; // mock
