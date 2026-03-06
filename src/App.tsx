@@ -10,7 +10,7 @@ import Plans from "./pages/Plans";
 import Earn from "./pages/Earn";
 import Withdraw from "./pages/Withdraw";
 import Referral from "./pages/Referral";
-import Admin from "./pages/Admin";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +29,7 @@ const App = () => (
           <Route path="/earn" element={<Earn />} />
           <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/referral" element={<Referral />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

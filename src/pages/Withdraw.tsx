@@ -13,7 +13,7 @@ const Withdraw = () => {
   const [accountError, setAccountError] = useState("");
   const [showFreePlanPopup, setShowFreePlanPopup] = useState(false);
   const { toast } = useToast();
-  const balance = 1250;
+  const balance = 0;
   const currentPlan = "Free"; // mock — would come from user state
   const activatedReferrals = 2; // mock
   const queuePosition = 3; // mock
@@ -107,7 +107,7 @@ const Withdraw = () => {
               {accountError && <p className="text-xs text-destructive mt-1">{accountError}</p>}
             </div>
 
-            <button type="submit" className="w-full py-3.5 gold-gradient-bg text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all gold-glow">Submit Withdrawal Request</button>
+            <button type="submit" className="w-full py-3.5 btn-golden">Submit Withdrawal Request</button>
           </form>
         </motion.div>
       </div>
