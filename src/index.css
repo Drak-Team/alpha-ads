@@ -118,6 +118,20 @@
     background: linear-gradient(135deg, hsl(150 35% 12%), hsl(150 40% 18%));
   }
 
+  /* Glossy golden button utility */
+  .btn-golden {
+    background: linear-gradient(135deg, hsl(43 96% 56%), hsl(35 95% 44%));
+    color: hsl(150 40% 10%);
+    font-weight: 600;
+    box-shadow: 0 2px 12px hsl(43 96% 50% / 0.3), inset 0 1px 0 hsl(43 90% 75% / 0.4);
+    @apply rounded-xl transition-all duration-300;
+  }
+
+  .btn-golden:hover {
+    background: linear-gradient(135deg, hsl(43 96% 60%), hsl(35 95% 48%));
+    box-shadow: 0 4px 20px hsl(43 96% 50% / 0.4), inset 0 1px 0 hsl(43 90% 75% / 0.5);
+  }
+
   .shimmer {
     background: linear-gradient(
       110deg,

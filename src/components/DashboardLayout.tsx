@@ -1,15 +1,23 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Crown, Wallet, Users, LogOut, Shield, Play } from "lucide-react";
+import { LayoutDashboard, Crown, Wallet, Users, LogOut, Shield, Play, Home, Zap, UserCircle } from "lucide-react";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import logo from "@/assets/logo.png";
 
-const navItems = [
+const sidebarItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/plans", label: "Plans", icon: Crown },
   { path: "/earn", label: "Watch & Earn", icon: Play },
   { path: "/withdraw", label: "Withdraw", icon: Wallet },
   { path: "/referral", label: "Referral", icon: Users },
+];
+
+const bottomNavItems = [
+  { path: "/dashboard", label: "Home", icon: Home },
+  { path: "/earn", label: "Active", icon: Zap },
+  { path: "/referral", label: "Affiliate", icon: Users },
+  { path: "/plans", label: "Plan", icon: Crown },
+  { path: "/withdraw", label: "Profile", icon: UserCircle },
 ];
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -27,7 +35,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map((item) => {
+          {sidebarItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
@@ -48,9 +56,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
         <div className="p-4 border-t border-secondary-foreground/10 space-y-1">
           <Link
-            to="/admin"
+            to="/admin-panel"
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-              location.pathname === "/admin"
+              location.pathname === "/admin-panel"
                 ? "gold-gradient-bg text-primary-foreground shadow-lg gold-glow"
                 : "text-secondary-foreground/70 hover:text-secondary-foreground hover:bg-secondary-foreground/5"
             }`}
@@ -68,10 +76,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </aside>
 
-      {/* Mobile Nav */}
+      {/* Mobile Bottom Nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 green-gradient-bg border-t border-secondary-foreground/10">
         <nav className="flex justify-around p-2">
-          {navItems.map((item) => {
+          {bottomNavItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
@@ -82,7 +90,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 }`}
               >
                 <item.icon className="w-5 h-5" />
-                <span className="truncate max-w-[48px]">{item.label.split(" ")[0]}</span>
+                <span className="truncate max-w-[48px]">{item.label}</span>
               </Link>
             );
           })}
