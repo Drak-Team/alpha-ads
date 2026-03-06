@@ -107,7 +107,7 @@ const Withdraw = () => {
               {accountError && <p className="text-xs text-destructive mt-1">{accountError}</p>}
             </div>
 
-            <button type="submit" className="w-full py-3.5 gold-gradient-bg text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all gold-glow">Submit Withdrawal Request</button>
+            <button type="submit" className="w-full py-3.5 btn-golden">Submit Withdrawal Request</button>
           </form>
         </motion.div>
       </div>
