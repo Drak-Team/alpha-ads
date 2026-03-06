@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, type Easing } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Gift, Banknote, ArrowDownToLine, UserX, ArrowRight, MessageCircle, Sparkles } from "lucide-react";
 import HeroSlider from "@/components/HeroSlider";
@@ -9,7 +9,7 @@ import logo from "@/assets/logo.png";
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, delay, ease: "easeOut" },
+  transition: { duration: 0.6, delay, ease: "easeOut" as Easing },
 });
 
 const features = [
