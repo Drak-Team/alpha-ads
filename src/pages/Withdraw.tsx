@@ -1,27 +1,13 @@
-  const handleWithdraw = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // ٹائم چیک کرنے کا لاجک (9 AM to 5 PM)
-    const now = new Date();
-    const currentHour = now.getHours(); // 24 گھنٹے والا فارمیٹ
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-    if (currentHour < 9 || currentHour >= 17) {
-      toast({
-        title: "Closed!",
-        description: "Withdrawals are only open from 9:00 AM to 5:00 PM.",
-        variant: "destructive",
-      });
-      return;
-    }
+const Withdraw = () => {
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Withdrawal Page</h1>
+      <p>Withdrawals are open from 9:00 AM to 5:00 PM.</p>
+    </div>
+  );
+};
 
-    if (Number(amount) < 5) {
-      toast({
-        title: "Minimum Amount",
-        description: "Minimum withdrawal is $5",
-        variant: "destructive",
-      });
-      return;
-    }
-    // باقی کوڈ...
-  };
-export default Withdraw;
+export default Withdraw; // یہ لائن سب سے ضروری ہے
