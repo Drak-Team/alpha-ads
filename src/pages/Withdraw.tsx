@@ -24,3 +24,4 @@
     }
     // باقی کوڈ...
   };
+export default Withdraw;
