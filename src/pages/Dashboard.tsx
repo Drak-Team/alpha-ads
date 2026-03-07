@@ -1,72 +1,118 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Wallet, TrendingUp, Crown, Clock, Play, Calendar, ArrowUpRight, ArrowDownLeft, DollarSign, Users, PiggyBank, ArrowDownToLine, Bot } from "lucide-react";
-import { Link } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { 
+  LayoutDashboard, 
+  Wallet, 
+  PlayCircle, 
+  Users, 
+  Settings,
+  ArrowUpRight,
+  LogOut
+} from "lucide-react";
 
 const Dashboard = () => {
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const ADMIN_EMAIL = "Algoalgo371@gmail.com";
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+      setUser(user);
+      
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      
+      setProfile(profile);
+    };
+
+    checkUser();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
+  if (!user || !profile) return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>;
+
   return (
-    <DashboardLayout>
-      <div className="p-4 pb-24 space-y-6 animate-in fade-in duration-500">
-        {/* Welcome Section */}
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* Header */}
+      <div className="bg-primary p-6 text-white rounded-b-3xl shadow-lg">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-black text-[#004d26] uppercase italic leading-none">Dollar Plus</h1>
-            <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Premium Arbitrage Trading</p>
+            <p className="text-primary-foreground/80 text-sm">خوش آمدید</p>
+            <h1 className="text-xl font-bold">{profile.full_name || "User"}</h1>
           </div>
-          <div className="w-10 h-10 bg-[#004d26] rounded-full flex items-center justify-center border-2 border-[#f1c40f]">
-            <Users className="text-[#f1c40f] w-5 h-5" />
-          </div>
+          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white">
+            <LogOut className="h-6 w-6" />
+          </Button>
         </div>
 
-        {/* Main Wallet Card */}
-        <div className="bg-[#004d26] p-6 rounded-[32px] text-white shadow-2xl relative overflow-hidden border-b-8 border-[#f1c40f]">
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 bg-[#f1c40f] rounded-full flex items-center justify-center">
-                <Wallet className="text-[#004d26] w-3.5 h-3.5" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-tighter text-white/70">Main Trading Wallet</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-black italic tracking-tighter">100.00</span>
-              <span className="text-[#f1c40f] font-black text-sm italic uppercase">PKR</span>
-            </div>
+        <Card className="bg-white/10 border-none text-white p-6 backdrop-blur-md">
+          <p className="text-sm opacity-80 mb-1">کل بیلنس</p>
+          <h2 className="text-3xl font-bold mb-4">Rs. {profile.balance?.toFixed(2) || "0.00"}</h2>
+          <div className="flex gap-4">
+            <Button onClick={() => navigate("/withdraw")} className="flex-1 bg-white text-primary hover:bg-white/90">
+              <Wallet className="mr-2 h-4 w-4" /> ودڈرال
+            </Button>
+            {user.email === ADMIN_EMAIL && (
+              <Button onClick={() => navigate("/admin-panel")} className="flex-1 bg-yellow-500 text-white hover:bg-yellow-600">
+                <Settings className="mr-2 h-4 w-4" /> ایڈمن پینل
+              </Button>
+            )}
           </div>
-        </div>
-
-        {/* Action Buttons Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <Link to="/deposit" className="bg-white p-4 rounded-3xl border-2 border-[#004d26] flex items-center gap-3 shadow-sm active:scale-95 transition-transform">
-            <div className="w-10 h-10 bg-green-100 rounded-2xl flex items-center justify-center">
-              <ArrowDownToLine className="text-[#004d26] w-6 h-6" />
-            </div>
-            <span className="font-black text-[#004d26] text-xs uppercase tracking-tighter">Deposit</span>
-          </Link>
-          <Link to="/withdraw" className="bg-white p-4 rounded-3xl border-2 border-red-200 flex items-center gap-3 shadow-sm active:scale-95 transition-transform">
-            <div className="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center">
-              <ArrowUpRight className="text-red-600 w-6 h-6" />
-            </div>
-            <span className="font-black text-red-600 text-xs uppercase tracking-tighter">Withdraw</span>
-          </Link>
-        </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-gray-50 p-4 rounded-3xl border border-gray-100">
-            <Bot className="text-[#004d26] w-5 h-5 mb-2" />
-            <p className="text-[9px] font-black text-gray-400 uppercase">Active Bots</p>
-            <h4 className="text-lg font-black text-[#004d26]">01</h4>
-          </div>
-          <div className="bg-gray-50 p-4 rounded-3xl border border-gray-100">
-            <TrendingUp className="text-[#004d26] w-5 h-5 mb-2" />
-            <p className="text-[9px] font-black text-gray-400 uppercase">Daily Yield</p>
-            <h4 className="text-lg font-black text-[#004d26]">0.33$</h4>
-          </div>
-        </div>
+        </Card>
       </div>
-    </DashboardLayout>
+
+      {/* Main Grid */}
+      <div className="p-4 grid grid-cols-2 gap-4 mt-4">
+        <Card onClick={() => navigate("/earn")} className="p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-100 transition-colors">
+          <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+            <PlayCircle />
+          </div>
+          <span className="font-medium text-sm">ایڈز دیکھیں</span>
+        </Card>
+
+        <Card onClick={() => navigate("/plans")} className="p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-100 transition-colors">
+          <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+            <ArrowUpRight />
+          </div>
+          <span className="font-medium text-sm">پلانز</span>
+        </Card>
+
+        <Card onClick={() => navigate("/referral")} className="p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-100 transition-colors">
+          <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+            <Users />
+          </div>
+          <span className="font-medium text-sm">دوستوں کو بلائیں</span>
+        </Card>
+
+        <Card className="p-4 flex flex-col items-center justify-center gap-2">
+          <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
+            <LayoutDashboard />
+          </div>
+          <span className="font-medium text-sm text-center">ڈیلی ٹاسک</span>
+        </Card>
+      </div>
+    </div>
   );
 };
 
 export default Dashboard;
+             
