@@ -1,93 +1,65 @@
 import { motion } from "framer-motion";
-import { Copy, Users, Gift, Share2, Link as LinkIcon } from "lucide-react";
+import { Users, UserPlus, Trophy, Share2, ArrowRight } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { useToast } from "@/hooks/use-toast";
-
-const referrals: { name: string; date: string; bonus: string; status: string }[] = [];
 
 const Referral = () => {
-  const { toast } = useToast();
-  const code = "SAP-INV-X7K9";
-  const referralLink = `${window.location.origin}/auth?mode=signup&ref=${code}`;
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(referralLink);
-    toast({ title: "Link Copied!", description: "Share this link with friends to earn 10% bonus." });
-  };
-
-  const copyCode = () => {
-    navigator.clipboard.writeText(code);
-    toast({ title: "Code Copied!", description: "Referral code copied to clipboard." });
-  };
+  const referralCode = "DP786123"; // This would be dynamic in a real app
+  
+  const levels = [
+    { level: 1, commission: "20%", label: "Direct Referrals", color: "bg-[#f1c40f]" },
+    { level: 2, commission: "12%", label: "Level 2 Network", color: "bg-[#d4ac0d]" },
+    { level: 3, commission: "6%", label: "Level 3 Network", color: "bg-[#004d26] text-white" },
+  ];
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold font-heading gold-gradient-text">Referral Program</h1>
-          <p className="text-foreground/60 mt-1 font-medium">Earn 10% of every friend's first deposit</p>
+      <div className="p-4">
+        <h2 className="text-2xl font-black text-[#004d26] mb-2 uppercase italic">Affiliate Program</h2>
+        <p className="text-gray-500 text-sm mb-6">Build your team and earn high commissions across 3 levels.</p>
+
+        {/* Commission Cards */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {levels.map((lvl) => (
+            <div key={lvl.level} className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 text-center">
+              <div className={`w-full ${lvl.color} py-1 rounded-lg text-[10px] font-black mb-2 uppercase`}>
+                Level {lvl.level}
+              </div>
+              <p className="text-xl font-black text-[#004d26]">{lvl.commission}</p>
+              <p className="text-[8px] text-gray-400 font-bold uppercase">{lvl.label}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Referral Link */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 mb-6 text-center">
-          <div className="w-16 h-16 rounded-2xl gold-gradient-bg flex items-center justify-center mx-auto mb-4 animate-float">
-            <Share2 className="w-8 h-8 text-primary-foreground" />
+        {/* Share Section */}
+        <div className="bg-[#004d26] rounded-3xl p-6 border-b-4 border-[#f1c40f] mb-8 shadow-xl">
+          <div className="flex items-center gap-4 mb-4 text-[#f1c40f]">
+            <Share2 className="w-6 h-6" />
+            <h3 className="font-bold text-white uppercase tracking-wider">Your Referral Link</h3>
           </div>
-          <h2 className="text-lg font-bold font-heading text-foreground mb-4">Your Referral Link</h2>
-          
-          <div className="flex items-center gap-2 p-3 bg-secondary rounded-xl border border-border mb-3">
-            <LinkIcon className="w-4 h-4 text-foreground/50 shrink-0" />
-            <span className="text-xs text-foreground/60 truncate flex-1 text-left font-mono">{referralLink}</span>
-            <button onClick={copyLink} className="shrink-0 px-3 py-1.5 gold-gradient-bg text-primary-foreground text-xs font-semibold rounded-lg hover:opacity-90 transition-all">
+          <div className="bg-white/10 p-4 rounded-2xl border border-white/20 flex items-center justify-between">
+            <code className="text-[#f1c40f] font-mono text-sm">{referralCode}</code>
+            <button className="bg-[#f1c40f] text-[#004d26] px-4 py-2 rounded-xl text-xs font-black uppercase shadow-lg">
               Copy
             </button>
           </div>
-
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-secondary rounded-xl border border-border">
-            <span className="text-sm text-foreground/60 font-medium">Code:</span>
-            <span className="text-lg font-mono font-bold gold-gradient-text tracking-wider">{code}</span>
-            <button onClick={copyCode} className="text-foreground/50 hover:text-primary transition-colors">
-              <Copy className="w-4 h-4" />
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6 text-center">
-            <Users className="w-6 h-6 text-primary mx-auto mb-2" />
-            <p className="text-2xl font-bold font-heading gold-gradient-text">0</p>
-            <p className="text-xs text-foreground/60 font-medium">Total Referrals</p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6 text-center">
-            <Gift className="w-6 h-6 text-primary mx-auto mb-2" />
-            <p className="text-2xl font-bold font-heading gold-gradient-text">₨ 0</p>
-            <p className="text-xs text-foreground/60 font-medium">Total Earned</p>
-          </motion.div>
         </div>
 
-        {/* Referral List */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card p-6">
-          <h3 className="text-lg font-bold font-heading text-foreground mb-4">Your Referrals</h3>
-          <div className="space-y-3">
-            {referrals.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No referrals yet. Share your link to start earning!</p>
-            ) : (
-              referrals.map((r, i) => (
-                <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{r.name}</p>
-                    <p className="text-xs text-foreground/50">{r.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-success">{r.bonus}</p>
-                    <p className="text-xs text-foreground/50">{r.status}</p>
-                  </div>
-                </div>
-              ))
-            )}
+        {/* Team Stats */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
+          <h3 className="font-black text-[#004d26] mb-4 uppercase flex items-center gap-2">
+            <Users className="w-5 h-5" /> Team Stats
+          </h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-2xl">
+              <span className="text-sm font-bold text-gray-500">Total Team Members</span>
+              <span className="text-lg font-black text-[#004d26]">0</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-2xl">
+              <span className="text-sm font-bold text-gray-500">Total Team Bonus</span>
+              <span className="text-lg font-black text-[#004d26]">₨ 0.00</span>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </DashboardLayout>
   );
