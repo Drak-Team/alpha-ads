@@ -1,59 +1,68 @@
-import { useEffect, useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import { ShieldCheck, Users, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import React, { useState } from 'react';
+import { CheckCircle, XCircle, Eye, User, DollarSign, Clock } from 'lucide-react';
 
 const AdminPanel = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  // آپ کی مخصوص ایڈمن ای میل
-  const adminEmail = "Algoalgo371@gmail.com"; 
-
-  useEffect(() => {
-    // یہاں ہم فرض کر رہے ہیں کہ یوزر لاگ ان ہے، اصل سسٹم میں یہ Supabase سے چیک ہوگا
-    // فی الحال ہم اسے آپ کی ای میل کے لیے اوپن کر رہے ہیں
-    const loggedInUser = localStorage.getItem("user_email"); 
-    if (loggedInUser === adminEmail) {
-       setIsAdmin(true);
-    }
-  }, []);
-
-  if (!isAdmin) {
-    return (
-      <div className="h-screen flex flex-col items-center justify-center bg-gray-50 p-10 text-center">
-        <h1 className="text-6xl font-black text-red-600 mb-4">404</h1>
-        <p className="text-xl font-bold text-gray-800 uppercase italic">Access Denied: Restricted Area</p>
-      </div>
-    );
-  }
+  const [activeTab, setActiveTab] = useState('deposits');
 
   return (
-    <DashboardLayout>
-      <div className="p-4 bg-gray-50 min-h-screen font-sans">
-        <div className="flex items-center gap-2 mb-8 bg-[#004d26] p-4 rounded-2xl border-b-4 border-[#f1c40f]">
-          <ShieldCheck className="w-8 h-8 text-[#f1c40f]" />
-          <h2 className="text-xl font-black text-white uppercase italic">Dollar-Plus Master Control</h2>
-        </div>
+    <div className="min-h-screen bg-[#064e3b] text-white p-6 pb-24 font-sans text-right">
+      <h2 className="text-2xl font-bold mb-8 text-center text-yellow-500 font-urdu">ایڈمن کنٹرول پینل</h2>
 
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-2xl border-l-4 border-green-500 shadow-sm">
-            <p className="text-[10px] font-black text-gray-400 uppercase">Total Users</p>
-            <h3 className="text-2xl font-black text-[#004d26]">248</h3>
-          </div>
-          <div className="bg-white p-4 rounded-2xl border-l-4 border-[#f1c40f] shadow-sm">
-            <p className="text-[10px] font-black text-gray-400 uppercase">Pending Pay</p>
-            <h3 className="text-2xl font-black text-[#004d26]">12</h3>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl p-6 shadow-md">
-            <h4 className="font-bold text-[#004d26] mb-4 flex items-center gap-2 uppercase text-sm">
-              <ArrowDownCircle className="w-4 h-4" /> Deposit Proofs
-            </h4>
-            <p className="text-gray-400 text-xs italic">User screenshots will appear here.</p>
-          </div>
-        </div>
+      {/* ٹیبز (ڈپوزٹ / ودڈرا) */}
+      <div className="flex gap-2 mb-8">
+        <button 
+          onClick={() => setActiveTab('withdrawals')}
+          className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all ${activeTab === 'withdrawals' ? 'bg-yellow-600 shadow-lg' : 'bg-white/5 opacity-50'}`}
+        >
+          ودڈرا ریکویسٹ
+        </button>
+        <button 
+          onClick={() => setActiveTab('deposits')}
+          className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all ${activeTab === 'deposits' ? 'bg-yellow-600 shadow-lg' : 'bg-white/5 opacity-50'}`}
+        >
+          ڈپوزٹ ریکویسٹ
+        </button>
       </div>
-    </DashboardLayout>
+
+      {/* لسٹ ایریا */}
+      <div className="space-y-4">
+        {activeTab === 'deposits' ? (
+          // ڈپازٹ کی مثال
+          <div className="bg-black/30 border border-white/10 p-5 rounded-[32px] shadow-xl">
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[10px] bg-yellow-600/20 text-yellow-500 px-3 py-1 rounded-full">پینڈنگ</span>
+              <div className="text-right">
+                <p className="font-bold text-sm">03037264598</p>
+                <p className="text-[10px] opacity-50">پلان: Gold ($10)</p>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button className="flex-1 bg-green-600 py-2 rounded-xl flex items-center justify-center gap-1 text-[10px] font-bold"><CheckCircle size={14} /> اپروو کریں</button>
+              <button className="flex-1 bg-red-600 py-2 rounded-xl flex items-center justify-center gap-1 text-[10px] font-bold"><XCircle size={14} /> رد کریں</button>
+              <button className="bg-white/10 p-2 rounded-xl flex items-center justify-center text-white"><Eye size={16} /></button>
+            </div>
+          </div>
+        ) : (
+          // ودڈرا کی مثال
+          <div className="bg-black/30 border border-white/10 p-5 rounded-[32px] shadow-xl">
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[10px] bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full font-bold">EasyPaisa</span>
+              <div className="text-right">
+                <p className="font-bold text-sm">Ahmad Nafees</p>
+                <p className="text-[10px] opacity-50">رقم: $20.00 (5600 PKR)</p>
+              </div>
+            </div>
+            <p className="text-[10px] mb-4 text-left opacity-70">نمبر: 03037264598</p>
+            <div className="flex gap-2">
+              <button className="flex-1 bg-green-600 py-2 rounded-xl flex items-center justify-center gap-1 text-[10px] font-bold"><CheckCircle size={14} /> ادائیگی کر دی</button>
+              <button className="flex-1 bg-red-600 py-2 rounded-xl flex items-center justify-center gap-1 text-[10px] font-bold"><XCircle size={14} /> کینسل کریں</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <p className="text-[9px] mt-10 text-center opacity-40 italic">ایڈمن پینل صرف آپ کے استعمال کے لیے ہے۔</p>
+    </div>
   );
 };
 
