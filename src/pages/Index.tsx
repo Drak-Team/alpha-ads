@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Robot, TrendingUp, ShieldCheck, Users } from "lucide-react";
+import { Bot, TrendingUp, ShieldCheck, Users } from "lucide-react";
 
 const Index = () => {
   return (
