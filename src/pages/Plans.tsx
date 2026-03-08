@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 const Plans = () => {
+  const [selectedPlan, setSelectedPlan] = useState(null); // منتخب کردہ پلان کے لیے
   const [copied, setCopied] = useState(false);
 
-  // تمام پیکجز کی لسٹ
   const plans = [
     { name: "Basic", price: 2, pkr: 600, daily: 0.20, limit: 1200 },
     { name: "Standard", price: 4, pkr: 1200, daily: 0.45, limit: 2400 },
@@ -20,10 +20,10 @@ const Plans = () => {
 
   return (
     <div className="min-h-screen bg-[#064e3b] text-white p-4 pb-24 font-sans">
-      <h2 className="text-2xl font-bold text-center text-yellow-500 mb-6">انویسٹمنٹ پلانز</h2>
+      <h2 className="text-2xl font-bold text-center text-yellow-500 mb-6 font-urdu">انویسٹمنٹ پلانز</h2>
       
-      {/* 1. تمام پیکجز کی نمائش */}
-      <div className="space-y-4 mb-10">
+      {/* پلانز کی لسٹ */}
+      <div className="space-y-4">
         {plans.map((plan) => (
           <div key={plan.name} className="bg-white/5 border border-white/10 p-4 rounded-2xl flex justify-between items-center shadow-lg">
             <div>
@@ -31,45 +31,54 @@ const Plans = () => {
               <p className="text-yellow-500 font-bold text-sm">${plan.price} ({plan.pkr} PKR)</p>
               <div className="mt-1 text-[9px] opacity-60">
                 <p>روزانہ آمدنی: ${plan.daily}</p>
-                <p>کل آمدنی کی حد: {plan.limit} PKR</p>
               </div>
             </div>
-            <button className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-xl font-bold text-[10px] transition-all">
+            <button 
+              onClick={() => setSelectedPlan(plan)}
+              className="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-xl font-bold text-[10px]"
+            >
               ایکٹیو کریں
             </button>
           </div>
         ))}
       </div>
 
-      {/* 2. پیمنٹ کا طریقہ (کاپی بٹن کے ساتھ) */}
-      <div className="bg-black/40 p-5 rounded-2xl border border-yellow-500/30 text-center mb-6 shadow-xl">
-        <p className="text-xs mb-3 opacity-80">ایزی پیسہ / جیز کیش پر رقم بھیجیں</p>
-        <div className="flex items-center justify-center gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
-          <span className="text-lg font-extrabold tracking-wider">03037264598</span>
-          <button 
-            onClick={copyNumber} 
-            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] transition-all ${copied ? 'bg-green-600' : 'bg-yellow-600'}`}
-          >
-            {copied ? "کاپی ہو گیا" : "کاپی کریں"}
-          </button>
-        </div>
-        <p className="text-[10px] mt-2 opacity-50">نام: Ahmad Nafees Anjum</p>
-      </div>
+      {/* پیمنٹ ونڈو (جب بٹن دبایا جائے) */}
+      {selectedPlan && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-5 z-50">
+          <div className="bg-emerald-900 border border-yellow-500/30 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
+            {/* بند کرنے کا بٹن */}
+            <button onClick={() => setSelectedPlan(null)} className="absolute top-4 right-4 text-xl opacity-50">✕</button>
 
-      {/* 3. اسکرین شاٹ اپ لوڈ سیکشن */}
-      <div className="bg-white/5 p-6 rounded-2xl border border-white/10 shadow-lg">
-        <p className="text-sm font-bold mb-4 text-center">پیمنٹ کا ثبوت (اسکرین شاٹ) اپ لوڈ کریں</p>
-        <div className="bg-emerald-900/30 p-4 rounded-xl border border-dashed border-white/20 text-center">
-          <input type="file" className="text-[10px] w-full mb-4" accept="image/*" />
-          <button className="w-full bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold text-sm shadow-lg transition-all">
-            ڈپوزٹ کی درخواست بھیجیں
-          </button>
-        </div>
-      </div>
+            <h3 className="text-xl font-bold text-center text-yellow-500 mb-2">{selectedPlan.name} پلان منتخب کریں</h3>
+            <p className="text-center text-xs opacity-80 mb-6">آپ کو <span className="font-bold text-white text-sm">{selectedPlan.pkr} PKR</span> بھیجنے ہوں گے۔</p>
 
-      <p className="text-[9px] mt-6 opacity-40 text-center italic leading-relaxed">
-        نوٹ: رقم بھیجنے کے بعد اسکرین شاٹ اپ لوڈ کریں۔ ایڈمن 1 سے 2 گھنٹے میں آپ کا پلان ایکٹیو کر دے گا۔
-      </p>
+            {/* پیمنٹ نمبر */}
+            <div className="bg-black/30 p-4 rounded-2xl text-center mb-6">
+              <p className="text-[10px] mb-2 opacity-60">ایزی پیسہ / جیز کیش</p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-lg font-bold">03037264598</span>
+                <button onClick={copyNumber} className="bg-yellow-600 text-[10px] px-3 py-1 rounded-lg">
+                  {copied ? "کاپی ہوا" : "کاپی کریں"}
+                </button>
+              </div>
+              <p className="text-[10px] mt-2 opacity-60">نام: Ahmad Nafees Anjum</p>
+            </div>
+
+            {/* اپ لوڈ سیکشن */}
+            <div className="space-y-4">
+              <p className="text-[10px] text-center opacity-80">پیمنٹ بھیجنے کے بعد اسکرین شاٹ یہاں اپ لوڈ کریں:</p>
+              <input type="file" className="text-[10px] w-full bg-black/20 p-2 rounded-lg border border-white/10" accept="image/*" />
+              <button 
+                onClick={() => { alert("درخواست موصول ہوگئی! ایڈمن جلد تصدیق کرے گا۔"); setSelectedPlan(null); }}
+                className="w-full bg-green-600 py-3 rounded-xl font-bold text-sm shadow-lg"
+              >
+                ڈپوزٹ کنفرم کریں
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
