@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, ArrowDownCircle, ArrowUpCircle, Bell, Users, MessageCircle, Lock, PlayCircle, MessageSquare, Gift } from 'lucide-react';
+import { Wallet, ArrowDownCircle, ArrowUpCircle, Bell, Users, MessageCircle, Lock, PlayCircle, MessageSquare } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
