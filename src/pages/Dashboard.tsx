@@ -71,7 +71,7 @@ const Dashboard = () => {
           className="bg-yellow-600/20 p-5 rounded-3xl border border-yellow-500/20 flex justify-between items-center cursor-pointer hover:bg-yellow-600/30 transition-all"
         >
           <div className="flex items-center gap-3 text-left">
-             <div className="bg-yellow-600 p-2 rounded-xl text-white"><Gift size={20} /></div>
+             <div className="bg-yellow-600 p-2 rounded-xl text-white"><Wallet size={20} /></div>
              <div>
                <p className="font-bold text-yellow-500">ارننگ پیکجز</p>
                <p className="text-[10px] opacity-70">تمام پلانز دیکھنے کے لیے کلک کریں</p>
