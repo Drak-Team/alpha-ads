@@ -2,7 +2,7 @@ import { Home, Gem, PlayCircle, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Navigation = () => {
-  const navigate = navigate();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const menuItems = [
