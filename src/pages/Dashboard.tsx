@@ -1,3 +1,7 @@
+<div className="p-6 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-b-[40px] text-center shadow-xl">
+  <h1 className="text-3xl font-black text-[#064e3b] tracking-tighter italic">GOLD PLUS</h1>
+  <p className="text-[10px] text-[#064e3b]/70 font-bold uppercase tracking-[3px] mt-1">Earn More, Live Better</p>
+</div>
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
