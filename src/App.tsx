@@ -4,7 +4,8 @@ import Plans from "./pages/Plans";
 import Ads from "./pages/Ads";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat"; 
-import Referral from "./pages/Referral"; // فائل کا نام Referral ہے
+import Referral from "./pages/Referral";
+import Withdraw from "./pages/Withdraw"; // یہ نئی لائن شامل کی ہے
 import Navigation from "./components/Navigation";
 
 const App = () => (
@@ -17,7 +18,8 @@ const App = () => (
         <Route path="/ads" element={<Ads />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/chat" element={<Chat />} />
-        <Route path="/refer" element={<Referral />} /> {/* راستہ /refer ہی رہے گا */}
+        <Route path="/refer" element={<Referral />} />
+        <Route path="/withdraw" element={<Withdraw />} /> {/* یہ راستہ بھی شامل کر دیا ہے */}
       </Routes>
     </div>
     <Navigation />
