@@ -87,4 +87,4 @@ const Referral = () => {
   );
 };
 
-export default Referral
+export default Referral;
