@@ -1,135 +1,84 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { Phone, Lock, User, UserPlus } from "lucide-react";
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
-const Auth = () => {
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [referral, setReferral] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
+const Signup = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  
+  // URL سے ریفرل آئی ڈی حاصل کریں (مثال: ?ref=123)
+  const referrerId = searchParams.get('ref');
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    
+    // 1. نیا اکاؤنٹ بنائیں
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    // موبائل نمبر کو ای میل کی شکل میں تبدیل کرنا تاکہ سسٹم قبول کرے
-    const fakeEmail = `${phone}@alpha.com`;
+    if (authError) {
+      alert(authError.message);
+      return;
+    }
 
-    if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: fakeEmail,
-        password: password,
-      });
-      if (error) {
-        toast({ title: "غلطی", description: "نمبر یا پاس ورڈ غلط ہے", variant: "destructive" });
-      } else {
-        navigate("/dashboard");
-      }
-    } else {
-      const { data, error } = await supabase.auth.signUp({
-        email: fakeEmail,
-        password: password,
-        options: {
-          data: {
-            full_name: fullName,
-            phone_number: phone,
-            referral_by: referral
-          }
-        }
-      });
-      if (error) {
-        toast({ title: "غلطی", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "کامیابی", description: "آپ کا اکاؤنٹ بن گیا ہے! اب لاگ ان کریں۔" });
-        setIsLogin(true);
+    if (authData.user) {
+      // 2. پروفائل ٹیبل میں ڈیٹا ڈالیں بشمول ریفرر آئی ڈی
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          full_name: fullName,
+          referrer_id: referrerId || null // اگر لنک میں آئی ڈی ہے تو محفوظ کریں
+        })
+        .eq('id', authData.user.id);
+
+      if (!profileError) {
+        alert("اکاؤنٹ بن گیا ہے!");
+        navigate('/dashboard');
       }
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#004d40] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div className="bg-[#fbbf24] p-6 text-center">
-          <h1 className="text-2xl font-bold text-[#004d40]">ALPHA ADS & EARN</h1>
-          <p className="text-sm font-medium opacity-80">پاکستان کا اپنا ارننگ پلیٹ فارم</p>
-        </div>
+    <div className="min-h-screen bg-[#064e3b] flex items-center justify-center p-6">
+      <form onSubmit={handleSignup} className="bg-white/10 p-8 rounded-[40px] w-full max-w-md border border-white/10 backdrop-blur-md">
+        <h2 className="text-2xl font-bold text-white text-center mb-6 font-urdu">نیا اکاؤنٹ بنائیں</h2>
         
-        <form onSubmit={handleAuth} className="p-8 space-y-4">
-          {!isLogin && (
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <Input 
-                placeholder="پورا نام" 
-                className="pl-10" 
-                required 
-                value={fullName} 
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
-          )}
-
-          <div className="relative">
-            <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-            <Input 
-              placeholder="موبائل نمبر (03xxxxxxxxx)" 
-              type="tel"
-              className="pl-10" 
-              required 
-              value={phone} 
-              onChange={(e) => setPhone(e.target.value)}
-            />
+        {referrerId && (
+          <div className="bg-yellow-500/20 border border-yellow-500/50 p-3 rounded-2xl mb-4 text-center">
+            <p className="text-[10px] text-yellow-500 font-bold font-urdu">آپ ایک دوست کے ریفرل لنک سے جوائن کر رہے ہیں</p>
           </div>
+        )}
 
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-            <Input 
-              placeholder="پاس ورڈ" 
-              type="password"
-              className="pl-10" 
-              required 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+        <input 
+          type="text" placeholder="پورا نام" 
+          className="w-full bg-black/20 border border-white/10 p-4 rounded-2xl mb-4 text-white text-right font-urdu"
+          onChange={(e) => setFullName(e.target.value)}
+          required
+        />
+        <input 
+          type="email" placeholder="ای میل" 
+          className="w-full bg-black/20 border border-white/10 p-4 rounded-2xl mb-4 text-white"
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input 
+          type="password" placeholder="پاس ورڈ" 
+          className="w-full bg-black/20 border border-white/10 p-4 rounded-2xl mb-6 text-white"
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
-          {!isLogin && (
-            <div className="relative">
-              <UserPlus className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <Input 
-                placeholder="ریفرل کوڈ (آپشنل)" 
-                className="pl-10" 
-                value={referral} 
-                onChange={(e) => setReferral(e.target.value)}
-              />
-            </div>
-          )}
-
-          <Button type="submit" className="w-full bg-[#fbbf24] hover:bg-[#f59e0b] text-[#004d40] font-bold py-6 rounded-xl" disabled={loading}>
-            {loading ? "انتظار کریں..." : (isLogin ? "لاگ ان کریں" : "اکاؤنٹ بنائیں")}
-          </Button>
-
-          <p className="text-center text-sm text-gray-600 mt-4">
-            {isLogin ? "اکاؤنٹ نہیں ہے؟ " : "پہلے سے اکاؤنٹ ہے؟ "}
-            <span 
-              className="text-[#004d40] font-bold cursor-pointer underline"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "سائن اپ کریں" : "لاگ ان کریں"}
-            </span>
-          </p>
-        </form>
-      </div>
+        <button type="submit" className="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-yellow-600/20">
+          رجسٹر کریں
+        </button>
+      </form>
     </div>
   );
 };
 
-export default Auth;
+export default Signup;
