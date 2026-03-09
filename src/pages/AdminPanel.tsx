@@ -146,3 +146,85 @@ const AdminSettings = () => {
 };
 
 export default AdminSettings;
+import React, { useState, useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
+import { CheckCircle, XCircle, Clock, ExternalLink } from 'lucide-react';
+
+const AdminWithdrawals = () => {
+  const [requests, setRequests] = useState([]);
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
+    const { data } = await supabase
+      .from('withdrawals')
+      .select('*, profiles(full_name)')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+    if (data) setRequests(data);
+  };
+
+  const updateStatus = async (id, newStatus) => {
+    const { error } = await supabase
+      .from('withdrawals')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (!error) {
+      alert(`درخواست ${newStatus === 'completed' ? 'مکمل' : 'کینسل'} کر دی گئی ہے!`);
+      fetchRequests(); // لسٹ اپ ڈیٹ کریں
+    }
+  };
+
+  return (
+    <div className="mt-10 p-6 bg-black/20 rounded-[40px] border border-white/5 font-urdu text-right">
+      <h3 className="text-xl font-bold text-green-500 mb-6 flex items-center justify-end gap-2">
+        ودڈرا کی درخواستیں <Clock size={20} />
+      </h3>
+
+      {requests.length === 0 ? (
+        <p className="text-center opacity-30 py-10">فی الحال کوئی نئی درخواست نہیں ہے</p>
+      ) : (
+        <div className="space-y-4">
+          {requests.map((req) => (
+            <div key={req.id} className="bg-white/5 border border-white/10 p-5 rounded-3xl">
+              <div className="flex justify-between items-start mb-4">
+                <span className="bg-yellow-600/20 text-yellow-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                  {req.method}
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-white">{req.account_name}</p>
+                  <p className="text-[10px] opacity-50">{req.account_number}</p>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center bg-black/20 p-3 rounded-2xl mb-4 text-left">
+                <p className="text-xs opacity-50">رقم بھیجیں:</p>
+                <p className="text-lg font-black text-green-400">PKR {req.amount * 280} <span className="text-[8px] text-white/30">($ {req.amount})</span></p>
+              </div>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => updateStatus(req.id, 'completed')}
+                  className="flex-1 bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+                >
+                  <CheckCircle size={16} /> Approve
+                </button>
+                <button 
+                  onClick={() => updateStatus(req.id, 'rejected')}
+                  className="flex-1 bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+                >
+                  <XCircle size={16} /> Reject
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminWithdrawals;
