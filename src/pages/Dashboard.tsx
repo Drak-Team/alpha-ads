@@ -2,21 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Wallet, ArrowDownCircle, ArrowUpCircle, Bell, Users, 
-  MessageCircle, Lock, PlayCircle, Gift, Share2, TrendingUp, Youtube, CheckCircle2 
+  MessageCircle, Lock, PlayCircle, Gift, TrendingUp, Youtube, CheckCircle2, Award 
 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState({ balance: 0, team_size: 0, total_earned: 0 });
-  const isPackageActive = true; // یہاں آپ کی ڈیٹا بیس کی لاجک آئے گی
+  const isPackageActive = true; 
 
   useEffect(() => {
     const fetchStats = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (data) setUserData(data);
+        if (data) setUserData({
+          balance: data.balance || 0,
+          team_size: data.team_size || 0,
+          total_earned: data.total_earned || 0
+        });
       }
     };
     fetchStats();
@@ -31,8 +35,13 @@ const Dashboard = () => {
           <span className="font-black text-lg tracking-tighter italic">GOLD PLUS</span>
         </div>
         <div className="flex gap-2">
-          <div className="bg-white/5 p-2 rounded-full relative border border-white/10"><Bell size={20} /><span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span></div>
-          <div onClick={() => navigate('/profile')} className="bg-white/5 p-2 rounded-full border border-white/10"><Users size={20} /></div>
+          <div className="bg-white/5 p-2 rounded-full relative border border-white/10">
+            <Bell size={20} />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          </div>
+          <div onClick={() => navigate('/profile')} className="bg-white/5 p-2 rounded-full border border-white/10">
+            <Users size={20} />
+          </div>
         </div>
       </div>
 
@@ -57,12 +66,12 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* 3. کوئیک لنکس (Social & Support) */}
+        {/* 3. کوئیک لنکس */}
         <div className="grid grid-cols-2 gap-4">
-          <button onClick={() => window.open('YOUR_WHATSAPP_LINK', '_blank')} className="bg-white/5 py-4 rounded-3xl flex items-center justify-center gap-2 text-[11px] border border-white/5 font-urdu hover:bg-white/10">
+          <button onClick={() => window.open('https://wa.me/923037264598', '_blank')} className="bg-white/5 py-4 rounded-3xl flex items-center justify-center gap-2 text-[11px] border border-white/5 font-urdu hover:bg-white/10">
             <MessageCircle size={16} className="text-green-400" /> کسٹمر سپورٹ
           </button>
-          <button onClick={() => window.open('YOUR_YOUTUBE_LINK', '_blank')} className="bg-white/5 py-4 rounded-3xl flex items-center justify-center gap-2 text-[11px] border border-white/5 font-urdu hover:bg-white/10">
+          <button onClick={() => window.open('https://youtube.com/@DailyCashAlerts', '_blank')} className="bg-white/5 py-4 rounded-3xl flex items-center justify-center gap-2 text-[11px] border border-white/5 font-urdu hover:bg-white/10">
             <Youtube size={16} className="text-red-500" /> انٹرٹینمنٹ
           </button>
         </div>
@@ -71,7 +80,6 @@ const Dashboard = () => {
         <div className="space-y-4">
           <h3 className="text-xs font-bold opacity-60 pr-2 font-urdu text-right">آپ کے ٹاسک (Daily Tasks)</h3>
           
-          {/* ڈیلی ایڈز */}
           <div 
             onClick={() => isPackageActive ? navigate('/ads') : alert('پہلے پیکج ایکٹو کریں')}
             className={`p-5 rounded-[32px] border border-white/5 flex justify-between items-center transition-all ${isPackageActive ? 'bg-white/5 border-yellow-500/20 shadow-lg' : 'bg-black/30 opacity-60'}`}
@@ -93,29 +101,17 @@ const Dashboard = () => {
               <span className="text-[10px] font-bold opacity-40">Locked</span>
             )}
           </div>
-
-          {/* یوٹیوب چینل سبسکرائب */}
-          <div className="bg-white/5 p-5 rounded-[32px] border border-white/5 flex justify-between items-center shadow-lg">
-            <div className="flex items-center gap-4">
-               <div className="bg-red-600/20 p-3 rounded-2xl text-red-500"><Youtube size={22} /></div>
-               <div className="text-left">
-                 <p className="font-bold text-sm font-urdu">یوٹیوب ٹاسک</p>
-                 <p className="text-[9px] opacity-40">چینل سبسکرائب کریں</p>
-               </div>
-            </div>
-            <button onClick={() => window.open('YOUR_CHANNEL_LINK', '_blank')} className="bg-red-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase">Open</button>
-          </div>
         </div>
 
         {/* 5. سٹیٹس گریڈ */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 text-right">
           <div className="bg-black/20 p-5 rounded-[35px] border border-white/5">
-            <TrendingUp size={20} className="text-yellow-500 mb-2" />
+            <TrendingUp size={20} className="text-yellow-500 mb-2 mr-auto" />
             <p className="text-[10px] opacity-40 font-urdu">ٹیم سائز</p>
             <p className="font-black text-xl">{userData.team_size}</p>
           </div>
           <div className="bg-black/20 p-5 rounded-[35px] border border-white/5">
-            <Award size={20} className="text-blue-400 mb-2" />
+            <Award size={20} className="text-blue-400 mb-2 mr-auto" />
             <p className="text-[10px] opacity-40 font-urdu">ٹوٹل ارننگ</p>
             <p className="font-black text-xl">${userData.total_earned.toFixed(2)}</p>
           </div>
