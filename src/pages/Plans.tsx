@@ -31,14 +31,17 @@ const Plans = () => {
 
     setLoading(true);
     try {
-      const fileName = `dep-${Date.now()}.${file.name.split('.').pop()}`;
+      // فائل کا نام یونیک بنانا
+      const fileName = `deposit-${Date.now()}.${file.name.split('.').pop()}`;
 
+      // سپا بیس اسٹوریج میں اپ لوڈ (بالٹی کا نام 'deposits' چھوٹے حروف میں)
       const { error: uploadError } = await supabase.storage
         .from('deposits') 
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
+      // ڈیٹا بیس ٹیبل 'deposits' میں انٹری
       const { error: dbError } = await supabase
         .from('deposits')
         .insert({
@@ -50,12 +53,12 @@ const Plans = () => {
 
       if (dbError) throw dbError;
 
-      alert("درخواست موصول ہوگئی ہے! ✅");
+      alert("درخواست موصول ہوگئی ہے! ایڈمن جلد تصدیق کرے گا۔ ✅");
       setSelectedPlan(null);
       setFile(null);
 
     } catch (error: any) {
-      alert("خرابی: " + error.message);
+      alert("خرابی: " + (error.message || "اپ لوڈ نہیں ہو سکا"));
     } finally {
       setLoading(false);
     }
@@ -64,15 +67,15 @@ const Plans = () => {
   return (
     <div className="min-h-screen bg-[#064e3b] text-white p-4 pb-24 font-sans text-right">
       <div className="text-center mb-8 pt-4">
-        <h2 className="text-3xl font-black text-yellow-500 italic">GOLD PLUS</h2>
+        <h2 className="text-3xl font-black text-yellow-500 italic uppercase">Gold Plus</h2>
         <p className="text-[10px] opacity-60">بہترین انویسٹمنٹ، بہترین منافع</p>
       </div>
       
       <div className="grid grid-cols-1 gap-4">
         {plans.map((plan, index) => (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
             key={plan.name} 
             className={`relative overflow-hidden bg-gradient-to-l ${plan.color} to-white/5 border border-white/10 p-5 rounded-[32px] flex justify-between items-center shadow-xl`}
@@ -90,7 +93,12 @@ const Plans = () => {
                 <p className="flex items-center justify-end gap-1"><Play size={10}/> {plan.ads} Ads</p>
               </div>
             </div>
-            <button onClick={() => setSelectedPlan(plan)} className="z-10 bg-yellow-600 text-[#064e3b] px-5 py-2 rounded-xl font-black text-[10px] shadow-lg active:scale-95 transition-all">ایکٹیو کریں</button>
+            <button 
+              onClick={() => setSelectedPlan(plan)} 
+              className="z-10 bg-yellow-600 text-[#064e3b] px-5 py-2 rounded-xl font-black text-[10px] shadow-lg active:scale-95 transition-all"
+            >
+              ایکٹیو کریں
+            </button>
           </motion.div>
         ))}
       </div>
@@ -98,21 +106,35 @@ const Plans = () => {
       {selectedPlan && (
         <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-5 z-50 backdrop-blur-sm">
           <div className="bg-[#064e3b] border-2 border-yellow-500/50 w-full max-w-sm rounded-[40px] p-8 relative shadow-2xl">
-            <button onClick={() => setSelectedPlan(null)} className="absolute top-6 left-6 opacity-40 text-white"><X size={24}/></button>
+            <button onClick={() => setSelectedPlan(null)} className="absolute top-6 left-6 opacity-40 text-white hover:opacity-100 transition-opacity"><X size={24}/></button>
             <div className="text-center mb-6">
               <h3 className="text-2xl font-black text-yellow-500">{selectedPlan.name} پلان</h3>
               <p className="text-xs opacity-60 mt-1">رقم بھیجیں اور اسکرین شاٹ لگائیں</p>
             </div>
+            
             <div className="bg-black/30 p-5 rounded-3xl text-center mb-6 border border-white/5 font-urdu">
               <p className="text-[10px] mb-2 opacity-50">نمبر: 03037264598</p>
               <button onClick={copyNumber} className="bg-yellow-600/20 text-yellow-500 text-[10px] px-4 py-1 rounded-full border border-yellow-500/30 mb-2">
-                {copied ? "کاپی ہوا" : "نمبر کاپی کریں"}
+                {copied ? "کاپی ہوا ✅" : "نمبر کاپی کریں"}
               </button>
               <p className="text-[11px] opacity-70">نام: Ahmad Nafees Anjum</p>
             </div>
+
             <div className="space-y-4">
-              <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="w-full text-[10px]" accept="image/*" />
-              <button onClick={handleConfirmDeposit} disabled={loading} className={`w-full py-4 rounded-2xl font-black text-lg ${loading ? 'bg-gray-700' : 'bg-green-600'}`}>
+              <div className="relative border-2 border-dashed border-white/10 rounded-2xl p-4 text-center">
+                <input 
+                  type="file" 
+                  onChange={(e) => setFile(e.target.files?.[0] || null)} 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  accept="image/*" 
+                />
+                <p className="text-[10px] opacity-60">{file ? file.name : "اسکرین شاٹ یہاں اپ لوڈ کریں"}</p>
+              </div>
+              <button 
+                onClick={handleConfirmDeposit} 
+                disabled={loading} 
+                className={`w-full py-4 rounded-2xl font-black text-lg transition-all ${loading ? 'bg-gray-700 opacity-50' : 'bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20'}`}
+              >
                 {loading ? "انتظار کریں..." : "کنفرم کریں"}
               </button>
             </div>
