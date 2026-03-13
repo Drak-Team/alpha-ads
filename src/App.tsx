@@ -5,7 +5,8 @@ import Ads from "./pages/Ads";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat"; 
 import Referral from "./pages/Referral";
-import Withdraw from "./pages/Withdraw"; // یہ نئی لائن شامل کی ہے
+import Withdraw from "./pages/Withdraw";
+import Deposit from "./pages/Deposit"; // یہاں ڈپازٹ کو شامل کیا ہے
 import Navigation from "./components/Navigation";
 
 const App = () => (
@@ -19,7 +20,8 @@ const App = () => (
         <Route path="/profile" element={<Profile />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/refer" element={<Referral />} />
-        <Route path="/withdraw" element={<Withdraw />} /> {/* یہ راستہ بھی شامل کر دیا ہے */}
+        <Route path="/withdraw" element={<Withdraw />} />
+        <Route path="/deposit" element={<Deposit />} /> {/* ڈپازٹ کا راستہ یہاں سیٹ کر دیا ہے */}
       </Routes>
     </div>
     <Navigation />
