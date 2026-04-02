@@ -193,7 +193,7 @@ const AdminWithdrawals = () => {
               <div className="flex justify-between items-start mb-4">
                 <span className="bg-yellow-600/20 text-yellow-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase">
                   {req.method}
-                </div>
+                </span>
                 <div className="text-right">
                   <p className="font-bold text-white">{req.account_name}</p>
                   <p className="text-[10px] opacity-50">{req.account_number}</p>
