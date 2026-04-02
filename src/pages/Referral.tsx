@@ -20,7 +20,7 @@ const Referral = () => {
       const { count: l1Count } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
-        .eq('referrer_id', user.id);
+        .eq('referred_by', user.id);
 
       // نوٹ: لیول 2 اور 3 کے لیے ہمیں تھوڑا ایڈوانس فنکشن چاہیے ہوگا
       // ابھی کے لیے ہم لیول 1 کو اصلی دکھا رہے ہیں

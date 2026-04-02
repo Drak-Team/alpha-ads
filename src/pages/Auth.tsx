@@ -31,8 +31,8 @@ const Signup = () => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          full_name: fullName,
-          referrer_id: referrerId || null // اگر لنک میں آئی ڈی ہے تو محفوظ کریں
+          display_name: fullName,
+          referred_by: referrerId || null
         })
         .eq('id', authData.user.id);
 

@@ -1,239 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, Save, Percent, Wallet, ArrowDownCircle, RefreshCw } from 'lucide-react';
-
-const AdminSettings = () => {
-  const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState({
-    referral_commission: 15, // فیصد میں
-    min_withdraw: 500,       // روپے میں
-    withdraw_fees: 5,        // فیصد میں
-    ad_reward: 0.50          // ایک ایڈ کے پیسے
-  });
-
-  // پیج لوڈ ہوتے ہی ڈیٹا بیس سے سیٹنگز لانے کے لیے
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('admin_settings')
-          .select('*')
-          .eq('id', 1)
-          .single();
-        
-        if (data) {
-          setSettings({
-            referral_commission: data.referral_commission,
-            min_withdraw: data.min_withdraw,
-            withdraw_fees: data.withdraw_fees,
-            ad_reward: data.ad_reward
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching settings:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSettings();
-  }, []);
-
-  // سیٹنگز کو ڈیٹا بیس میں محفوظ کرنے کے لیے
-  const handleSave = async () => {
-    const { error } = await supabase
-      .from('admin_settings')
-      .upsert({ 
-        id: 1, 
-        referral_commission: settings.referral_commission,
-        min_withdraw: settings.min_withdraw,
-        withdraw_fees: settings.withdraw_fees,
-        ad_reward: settings.ad_reward,
-        updated_at: new Date().toISOString()
-      });
-    
-    if (error) {
-      alert("ایرر: " + error.message);
-    } else {
-      alert("سیٹنگز کامیابی سے محفوظ ہو گئی ہیں! ✅");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-20 text-yellow-500">
-        <RefreshCw className="animate-spin mr-2" />
-        <span className="font-urdu">لوڈنگ ہو رہی ہے...</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-6 bg-black/20 rounded-[40px] border border-white/5 font-urdu text-right">
-      <div className="flex items-center justify-end gap-3 mb-8">
-        <h3 className="text-xl font-bold text-yellow-500">ایپ کنٹرول سیٹنگز</h3>
-        <Settings className="text-yellow-500" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        {/* ریفرل کمیشن */}
-        <div className="bg-white/5 p-4 rounded-2xl">
-          <label className="text-[10px] opacity-50 block mb-2 text-right">ریفرل کمیشن (%)</label>
-          <div className="flex items-center gap-3">
-            <Percent size={16} className="text-purple-400" />
-            <input 
-              type="number" 
-              value={settings.referral_commission}
-              onChange={(e) => setSettings({...settings, referral_commission: Number(e.target.value)})}
-              className="bg-transparent border-b border-white/20 w-full text-left font-bold py-1 focus:outline-none text-white"
-            />
-          </div>
-        </div>
-
-        {/* کم از کم ودڈرا */}
-        <div className="bg-white/5 p-4 rounded-2xl">
-          <label className="text-[10px] opacity-50 block mb-2 text-right">کم از کم ودڈرا (PKR)</label>
-          <div className="flex items-center gap-3">
-            <Wallet size={16} className="text-green-400" />
-            <input 
-              type="number" 
-              value={settings.min_withdraw}
-              onChange={(e) => setSettings({...settings, min_withdraw: Number(e.target.value)})}
-              className="bg-transparent border-b border-white/20 w-full text-left font-bold py-1 focus:outline-none text-white"
-            />
-          </div>
-        </div>
-
-        {/* ودڈرا فیس */}
-        <div className="bg-white/5 p-4 rounded-2xl">
-          <label className="text-[10px] opacity-50 block mb-2 text-right">ودڈرا فیس (%)</label>
-          <div className="flex items-center gap-3">
-            <ArrowDownCircle size={16} className="text-red-400" />
-            <input 
-              type="number" 
-              value={settings.withdraw_fees}
-              onChange={(e) => setSettings({...settings, withdraw_fees: Number(e.target.value)})}
-              className="bg-transparent border-b border-white/20 w-full text-left font-bold py-1 focus:outline-none text-white"
-            />
-          </div>
-        </div>
-
-        {/* ایڈ ریوارڈ */}
-        <div className="bg-white/5 p-4 rounded-2xl">
-          <label className="text-[10px] opacity-50 block mb-2 text-right">ایک ایڈ کی قیمت (PKR)</label>
-          <div className="flex items-center gap-3">
-            <RefreshCw size={16} className="text-blue-400" />
-            <input 
-              type="number" 
-              step="0.01"
-              value={settings.ad_reward}
-              onChange={(e) => setSettings({...settings, ad_reward: Number(e.target.value)})}
-              className="bg-transparent border-b border-white/20 w-full text-left font-bold py-1 focus:outline-none text-white"
-            />
-          </div>
-        </div>
-
-        <button 
-          onClick={handleSave}
-          className="bg-yellow-600 hover:bg-yellow-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all mt-4 text-white"
-        >
-          <Save size={18} /> سیٹنگز محفوظ کریں
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default AdminSettings;
-import React, { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, XCircle, Clock, ExternalLink } from 'lucide-react';
-
-const AdminWithdrawals = () => {
-  const [requests, setRequests] = useState([]);
-
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
-  const fetchRequests = async () => {
-    const { data } = await supabase
-      .from('withdrawals')
-      .select('*, profiles(full_name)')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-    if (data) setRequests(data);
-  };
-
-  const updateStatus = async (id, newStatus) => {
-    const { error } = await supabase
-      .from('withdrawals')
-      .update({ status: newStatus })
-      .eq('id', id);
-
-    if (!error) {
-      alert(`درخواست ${newStatus === 'completed' ? 'مکمل' : 'کینسل'} کر دی گئی ہے!`);
-      fetchRequests(); // لسٹ اپ ڈیٹ کریں
-    }
-  };
-
-  return (
-    <div className="mt-10 p-6 bg-black/20 rounded-[40px] border border-white/5 font-urdu text-right">
-      <h3 className="text-xl font-bold text-green-500 mb-6 flex items-center justify-end gap-2">
-        ودڈرا کی درخواستیں <Clock size={20} />
-      </h3>
-
-      {requests.length === 0 ? (
-        <p className="text-center opacity-30 py-10">فی الحال کوئی نئی درخواست نہیں ہے</p>
-      ) : (
-        <div className="space-y-4">
-          {requests.map((req) => (
-            <div key={req.id} className="bg-white/5 border border-white/10 p-5 rounded-3xl">
-              <div className="flex justify-between items-start mb-4">
-                <span className="bg-yellow-600/20 text-yellow-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase">
-                  {req.method}
-                </span>
-                <div className="text-right">
-                  <p className="font-bold text-white">{req.account_name}</p>
-                  <p className="text-[10px] opacity-50">{req.account_number}</p>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center bg-black/20 p-3 rounded-2xl mb-4 text-left">
-                <p className="text-xs opacity-50">رقم بھیجیں:</p>
-                <p className="text-lg font-black text-green-400">PKR {req.amount * 280} <span className="text-[8px] text-white/30">($ {req.amount})</span></p>
-              </div>
-
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => updateStatus(req.id, 'completed')}
-                  className="flex-1 bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <CheckCircle size={16} /> Approve
-                </button>
-                <button 
-                  onClick={() => updateStatus(req.id, 'rejected')}
-                  className="flex-1 bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <XCircle size={16} /> Reject
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default AdminWithdrawals;
-import React, { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, XCircle, Clock, User, Wallet } from 'lucide-react';
 
-const AdminWithdrawals = () => {
-  const [requests, setRequests] = useState([]);
+const AdminPanel = () => {
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -242,81 +12,85 @@ const AdminWithdrawals = () => {
 
   const fetchRequests = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('withdrawals')
       .select('*')
       .eq('status', 'pending')
-      .order('created_at', { ascending: false });
+      .order('requested_at', { ascending: false });
     
     if (data) setRequests(data);
     setLoading(false);
   };
 
-  const handleAction = async (id: string, newStatus: string) => {
+  const handleAction = async (id: string, newStatus: 'approved' | 'rejected') => {
     const { error } = await supabase
       .from('withdrawals')
       .update({ status: newStatus })
       .eq('id', id);
 
     if (!error) {
-      alert(`درخواست ${newStatus === 'completed' ? 'منظور' : 'مسترد'} کر دی گئی ہے!`);
-      fetchRequests(); // لسٹ اپ ڈیٹ کریں
+      alert(`درخواست ${newStatus === 'approved' ? 'منظور' : 'مسترد'} کر دی گئی ہے!`);
+      fetchRequests();
     }
   };
 
   return (
-    <div className="mt-10 p-6 bg-black/40 rounded-[40px] border border-white/10 font-urdu text-right">
-      <div className="flex items-center justify-end gap-3 mb-6">
-        <h3 className="text-xl font-bold text-yellow-500">ودڈرا کی درخواستیں</h3>
-        <Clock className="text-yellow-500" />
-      </div>
+    <div className="min-h-screen bg-[#042f24] text-white p-6 pb-28">
+      <h2 className="text-2xl font-black text-yellow-500 mb-6 text-center">ADMIN PANEL</h2>
+      
+      <div className="p-6 bg-black/40 rounded-[40px] border border-white/10 font-urdu text-right">
+        <div className="flex items-center justify-end gap-3 mb-6">
+          <h3 className="text-xl font-bold text-yellow-500">ودڈرا کی درخواستیں</h3>
+          <Clock className="text-yellow-500" />
+        </div>
 
-      {loading ? (
-        <p className="text-center opacity-50 py-10">لوڈنگ ہو رہی ہے...</p>
-      ) : requests.length === 0 ? (
-        <p className="text-center opacity-30 py-10">کوئی نئی درخواست موجود نہیں ہے</p>
-      ) : (
-        <div className="space-y-4">
-          {requests.map((req: any) => (
-            <div key={req.id} className="bg-white/5 border border-white/10 p-5 rounded-3xl">
-              <div className="flex justify-between items-center mb-4">
-                <span className="bg-yellow-600 text-[#064e3b] px-3 py-1 rounded-full text-[10px] font-black uppercase">
-                  {req.method}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-white">{req.account_name}</span>
-                  <User size={14} className="text-yellow-500" />
+        {loading ? (
+          <p className="text-center opacity-50 py-10">لوڈنگ ہو رہی ہے...</p>
+        ) : requests.length === 0 ? (
+          <p className="text-center opacity-30 py-10">کوئی نئی درخواست موجود نہیں ہے</p>
+        ) : (
+          <div className="space-y-4">
+            {requests.map((req: any) => (
+              <div key={req.id} className="bg-white/5 border border-white/10 p-5 rounded-3xl">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="bg-yellow-600 text-[#064e3b] px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                    {req.method}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white">{req.account_number}</span>
+                    <User size={14} className="text-yellow-500" />
+                  </div>
+                </div>
+
+                <div className="bg-black/40 p-4 rounded-2xl mb-4 text-center border border-white/5">
+                  <p className="text-[10px] opacity-40 mb-1">اکاؤنٹ نمبر</p>
+                  <p className="font-mono text-lg text-yellow-500 tracking-wider font-bold">{req.account_number}</p>
+                  <div className="h-[1px] bg-white/5 my-2"></div>
+                  <p className="text-[10px] opacity-40 mb-1">قابلِ ادائیگی رقم</p>
+                  <p className="text-2xl font-black text-green-400">PKR {req.payout}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => handleAction(req.id, 'approved')}
+                    className="bg-green-600 hover:bg-green-500 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg"
+                  >
+                    <CheckCircle size={18} /> Approve
+                  </button>
+                  <button 
+                    onClick={() => handleAction(req.id, 'rejected')}
+                    className="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all border border-red-500/20"
+                  >
+                    <XCircle size={18} /> Reject
+                  </button>
                 </div>
               </div>
-
-              <div className="bg-black/40 p-4 rounded-2xl mb-4 text-center border border-white/5">
-                <p className="text-[10px] opacity-40 mb-1">اکاؤنٹ نمبر / آئی ڈی</p>
-                <p className="font-mono text-lg text-yellow-500 tracking-wider font-bold">{req.account_number}</p>
-                <div className="h-[1px] bg-white/5 my-2"></div>
-                <p className="text-[10px] opacity-40 mb-1">قابلِ ادائیگی رقم</p>
-                <p className="text-2xl font-black text-green-400">${req.amount}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={() => handleAction(req.id, 'completed')}
-                  className="bg-green-600 hover:bg-green-500 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg"
-                >
-                  <CheckCircle size={18} /> Approve
-                </button>
-                <button 
-                  onClick={() => handleAction(req.id, 'rejected')}
-                  className="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all border border-red-500/20"
-                >
-                  <XCircle size={18} /> Reject
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default AdminWithdrawals;
+export default AdminPanel;

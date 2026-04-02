@@ -31,25 +31,28 @@ const Plans = () => {
 
     setLoading(true);
     try {
-      // فائل کا نام یونیک بنانا
-      const fileName = `deposit-${Date.now()}.${file.name.split('.').pop()}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("لاگ ان ہونا ضروری ہے");
 
-      // سپا بیس اسٹوریج میں اپ لوڈ (بالٹی کا نام 'deposits' چھوٹے حروف میں)
+      const fileName = `deposit-${user.id}-${Date.now()}.${file.name.split('.').pop()}`;
+
       const { error: uploadError } = await supabase.storage
         .from('deposits') 
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // ڈیٹا بیس ٹیبل 'deposits' میں انٹری
+      const { data: { publicUrl } } = supabase.storage.from('deposits').getPublicUrl(fileName);
+
       const { error: dbError } = await supabase
         .from('deposits')
-        .insert({
-          plan_name: selectedPlan.name,
-          amount_pkr: selectedPlan.pkr,
-          screenshot_url: fileName,
+        .insert([{
+          user_id: user.id,
+          amount: selectedPlan.pkr,
+          transaction_id: `PLAN-${selectedPlan.name}-${Date.now()}`,
+          screenshot_url: publicUrl,
           status: 'pending'
-        });
+        }]);
 
       if (dbError) throw dbError;
 
