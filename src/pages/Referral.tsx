@@ -1,36 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { Share2, Copy, Users, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Share2, Copy, Users, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Referral = () => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
   const [counts, setCounts] = useState({ l1: 0, l2: 0, l3: 0 });
-  const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    const fetchReferralData = async () => {
-      // 1. موجودہ یوزر کی آئی ڈی حاصل کریں
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      setUserId(user.id);
 
-      // 2. لیول 1 کے ممبرز گنیں (جن کا ریفرر یہ یوزر ہے)
-      const { count: l1Count } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('referred_by', user.id);
+      const { data: profile } = await supabase.from('profiles').select('referral_code').eq('id', user.id).maybeSingle();
+      if (profile) setReferralCode(profile.referral_code);
 
-      // نوٹ: لیول 2 اور 3 کے لیے ہمیں تھوڑا ایڈوانس فنکشن چاہیے ہوگا
-      // ابھی کے لیے ہم لیول 1 کو اصلی دکھا رہے ہیں
+      const { count: l1Count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('referred_by', user.id);
       setCounts(prev => ({ ...prev, l1: l1Count || 0 }));
     };
-
-    fetchReferralData();
+    fetchData();
   }, []);
 
-  const referralLink = `https://dollarplus-ads.vercel.app/signup?ref=${userId}`;
+  const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -46,7 +39,6 @@ const Referral = () => {
         <div className="w-10"></div>
       </div>
 
-      {/* ریفرل لنک کارڈ */}
       <div className="bg-gradient-to-br from-[#1a1a2e] to-[#2a2a4e] border border-white/10 p-7 rounded-[40px] mb-8 shadow-2xl">
         <div className="flex items-center justify-between mb-6 text-purple-400 font-bold uppercase text-[10px] tracking-widest">
           <span>Invite Friends</span>
@@ -60,17 +52,16 @@ const Referral = () => {
         </div>
       </div>
 
-      {/* لیول وائز لسٹ */}
       <div className="space-y-4">
         {[
           { l: "Level 1", p: "15%", d: "Direct Referrals", c: "from-yellow-500 to-orange-600", count: counts.l1 },
           { l: "Level 2", p: "7%", d: "Indirect Team", c: "from-blue-500 to-indigo-600", count: counts.l2 },
           { l: "Level 3", p: "2%", d: "Network Bonus", c: "from-green-500 to-emerald-600", count: counts.l3 }
         ].map((item, i) => (
-          <div key={i} className="bg-white/5 border border-white/5 p-5 rounded-[32px] flex justify-between items-center active:scale-[0.98] transition-all">
+          <div key={i} className="bg-white/5 border border-white/5 p-5 rounded-[32px] flex justify-between items-center">
             <div className="text-left">
               <span className={`text-2xl font-black bg-gradient-to-r ${item.c} bg-clip-text text-transparent`}>{item.p}</span>
-              <p className="text-[8px] opacity-30 font-bold uppercase mt-1 tracking-tighter">Commission</p>
+              <p className="text-[8px] opacity-30 font-bold uppercase mt-1">Commission</p>
             </div>
             <div className="text-right">
               <p className="font-bold text-sm text-white/90">{item.l}</p>

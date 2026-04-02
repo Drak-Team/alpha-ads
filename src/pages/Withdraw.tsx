@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Wallet, Send, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
 const Withdraw = () => {
@@ -8,16 +8,14 @@ const Withdraw = () => {
   const [method, setMethod] = useState<'easypaisa' | 'jazzcash'>('easypaisa');
   const [amount, setAmount] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  const [accountName, setAccountName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleWithdraw = async () => {
-    if (!amount || !accountNumber || !accountName) {
+    if (!amount || !accountNumber) {
       alert("براہ کرم تمام معلومات درست طریقے سے پر کریں!");
       return;
     }
-
-    if (Number(amount) < 1) { // آپ اپنی کم از کم حد یہاں سیٹ کر سکتے ہیں
+    if (Number(amount) < 1) {
       alert("کم از کم ودھرا $1 ہونا چاہیے");
       return;
     }
@@ -27,15 +25,18 @@ const Withdraw = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("لاگ ان ہونا ضروری ہے");
 
-      // سپا بیس میں ودھرا ریکوسٹ بھیجنا
+      const fee = 0;
+      const payout = Number(amount) * 300; // PKR conversion
+
       const { error } = await supabase
-        .from('withdrawals') // اس نام کی ٹیبل سپا بیس میں ہونی چاہیے
+        .from('withdrawals')
         .insert({
           user_id: user.id,
           amount: Number(amount),
-          method: method,
+          method,
           account_number: accountNumber,
-          account_name: accountName,
+          fee,
+          payout,
           status: 'pending'
         });
 
@@ -43,23 +44,21 @@ const Withdraw = () => {
 
       alert("آپ کی ودھرا ریکوسٹ موصول ہو گئی ہے! 12 سے 24 گھنٹے میں رقم منتقل کر دی جائے گی۔");
       navigate('/dashboard');
-    } catch (error) {
-      alert("کچھ غلط ہو گیا، دوبارہ کوشش کریں!");
+    } catch (error: any) {
+      alert("کچھ غلط ہو گیا: " + (error.message || "دوبارہ کوشش کریں"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#042f24] text-white p-6 font-sans">
-      {/* Back Button */}
+    <div className="min-h-screen bg-[#042f24] text-white p-6 font-sans pb-24">
       <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-full mb-6">
         <ArrowLeft size={24} />
       </button>
 
       <h2 className="text-2xl font-black text-yellow-500 mb-6 text-center">WITHDRAW CASH</h2>
 
-      {/* Payment Method Selector */}
       <div className="flex gap-4 mb-8">
         <button 
           onClick={() => setMethod('easypaisa')} 
@@ -75,23 +74,11 @@ const Withdraw = () => {
         </button>
       </div>
 
-      {/* Form Fields */}
       <div className="space-y-4 bg-[#1a3a32] p-6 rounded-[35px] border border-white/10 shadow-2xl">
-        <div>
-          <label className="text-[10px] text-yellow-500 font-bold uppercase ml-2">Account Name</label>
-          <input 
-            type="text" 
-            placeholder="نام لکھیں"
-            className="w-full bg-[#042f24] border border-white/10 p-4 rounded-2xl focus:border-yellow-500 outline-none text-right font-urdu"
-            value={accountName}
-            onChange={(e) => setAccountName(e.target.value)}
-          />
-        </div>
-
         <div>
           <label className="text-[10px] text-yellow-500 font-bold uppercase ml-2">{method} Number</label>
           <input 
-            type="number" 
+            type="tel" 
             placeholder="اکاؤنٹ نمبر لکھیں"
             className="w-full bg-[#042f24] border border-white/10 p-4 rounded-2xl focus:border-yellow-500 outline-none"
             value={accountNumber}
@@ -123,7 +110,7 @@ const Withdraw = () => {
       <div className="mt-8 flex gap-3 p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
         <AlertCircle className="text-blue-500 shrink-0" size={20} />
         <p className="text-[10px] text-blue-500/80 font-urdu leading-relaxed">
-          ودھرا کی رقم آپ کے دیے گئے اکاؤنٹ میں 24 گھنٹوں کے اندر منتقل کر دی جائے گی۔ براہ کرم معلومات دوبارہ چیک کر لیں۔
+          ودھرا کی رقم آپ کے دیے گئے اکاؤنٹ میں 24 گھنٹوں کے اندر منتقل کر دی جائے گی۔
         </p>
       </div>
     </div>
