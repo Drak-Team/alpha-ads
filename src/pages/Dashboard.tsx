@@ -37,8 +37,8 @@ const Dashboard = () => {
         <p className="text-sm text-green-400 font-medium">≈ PKR {(balance * pkrRate).toFixed(1)} Today</p>
         
         <div className="flex gap-4 mt-8">
-          <button className="flex-1 bg-yellow-500 text-[#042f24] py-4 rounded-2xl font-black shadow-lg">DEPOSIT</button>
-          <button className="flex-1 bg-white/5 py-4 rounded-2xl font-bold border border-white/10">WITHDRAW</button>
+          <button onClick={() => navigate('/deposit')} className="flex-1 bg-yellow-500 text-[#042f24] py-4 rounded-2xl font-black shadow-lg">DEPOSIT</button>
+          <button onClick={() => navigate('/withdraw')} className="flex-1 bg-white/5 py-4 rounded-2xl font-bold border border-white/10">WITHDRAW</button>
         </div>
       </div>
 
