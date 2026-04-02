@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      deposits: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          screenshot_url: string | null
+          status: Database["public"]["Enums"]["deposit_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           created_at: string
@@ -281,6 +314,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      deposit_status: "pending" | "approved" | "rejected"
       withdrawal_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -410,6 +444,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      deposit_status: ["pending", "approved", "rejected"],
       withdrawal_status: ["pending", "approved", "rejected"],
     },
   },
