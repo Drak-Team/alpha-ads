@@ -25,42 +25,15 @@ const Ads = () => {
     const checkPackage = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
-
-      // Check for active subscription
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (sub) {
-        setHasActivePackage(true);
-      } else {
-        // Fallback: check approved deposit
-        const { data: dep } = await supabase
-          .from('deposits')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('status', 'approved')
-          .maybeSingle();
+      const { data: sub } = await supabase.from('subscriptions').select('id').eq('user_id', user.id).eq('is_active', true).maybeSingle();
+      if (sub) { setHasActivePackage(true); }
+      else {
+        const { data: dep } = await supabase.from('deposits').select('id').eq('user_id', user.id).eq('status', 'approved').maybeSingle();
         if (dep) setHasActivePackage(true);
       }
-
-      // Load today's progress
       const today = new Date().toISOString().split('T')[0];
-      const { data: adData } = await supabase
-        .from('ad_watches')
-        .select('ads_completed, all_completed')
-        .eq('user_id', user.id)
-        .eq('watched_date', today)
-        .maybeSingle();
-
-      if (adData) {
-        const done = Array.from({ length: adData.ads_completed }, (_, i) => i);
-        setCompletedAds(done);
-      }
-
+      const { data: adData } = await supabase.from('ad_watches').select('ads_completed, all_completed').eq('user_id', user.id).eq('watched_date', today).maybeSingle();
+      if (adData) setCompletedAds(Array.from({ length: adData.ads_completed }, (_, i) => i));
       setLoading(false);
     };
     checkPackage();
@@ -69,7 +42,7 @@ const Ads = () => {
   useEffect(() => {
     let timer: any;
     if (isTimerRunning && timeLeft > 0) {
-      timer = setInterval(() => setTimeLeft((p) => p - 1), 1000);
+      timer = setInterval(() => setTimeLeft(p => p - 1), 1000);
     } else if (timeLeft === 0 && isTimerRunning) {
       setIsTimerRunning(false);
       if (activeAdIndex !== null) {
@@ -87,39 +60,22 @@ const Ads = () => {
     if (!user) return;
     const today = new Date().toISOString().split('T')[0];
     const allDone = count >= 6;
-
-    const { data: existing } = await supabase
-      .from('ad_watches')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('watched_date', today)
-      .maybeSingle();
-
-    if (existing) {
-      await supabase.from('ad_watches').update({ ads_completed: count, all_completed: allDone }).eq('id', existing.id);
-    } else {
-      await supabase.from('ad_watches').insert({ user_id: user.id, watched_date: today, ads_completed: count, all_completed: allDone });
-    }
+    const { data: existing } = await supabase.from('ad_watches').select('id').eq('user_id', user.id).eq('watched_date', today).maybeSingle();
+    if (existing) await supabase.from('ad_watches').update({ ads_completed: count, all_completed: allDone }).eq('id', existing.id);
+    else await supabase.from('ad_watches').insert({ user_id: user.id, watched_date: today, ads_completed: count, all_completed: allDone });
   };
 
-  if (loading) return <div className="min-h-screen bg-[#042f24] flex items-center justify-center text-white font-urdu">چیک کیا جا رہا ہے...</div>;
+  if (loading) return <div className="min-h-screen bg-[#0d0a1a] flex items-center justify-center text-white">Loading...</div>;
 
   if (!hasActivePackage) {
     return (
-      <div className="min-h-screen bg-[#042f24] text-white p-6 flex flex-col items-center justify-center text-center pb-28">
-        <div className="bg-[#1a3a32] p-10 rounded-[40px] border border-white/10 shadow-2xl">
-          <div className="bg-orange-500/20 p-5 rounded-full inline-block mb-6 text-orange-500 animate-pulse">
-            <Lock size={48} />
-          </div>
-          <h2 className="text-2xl font-black mb-4 font-urdu text-yellow-500">ارننگ شروع کریں! 🚀</h2>
-          <p className="text-sm opacity-80 mb-8 font-urdu leading-relaxed">
-            اشتہارات دیکھ کر پیسے کمانے کے لیے اپنا پسندیدہ <span className="text-yellow-500 font-bold">پیکج ایکٹو</span> کریں۔
-          </p>
-          <button 
-            onClick={() => navigate('/plans')}
-            className="w-full bg-yellow-500 text-[#042f24] py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-transform"
-          >
-            پلانز دیکھیں
+      <div className="min-h-screen bg-[#0d0a1a] text-white p-6 flex flex-col items-center justify-center text-center pb-28">
+        <div className="bg-[#1a1035] p-10 rounded-3xl border border-purple-500/20 shadow-2xl">
+          <div className="bg-orange-500/20 p-5 rounded-full inline-block mb-6 text-orange-500 animate-pulse"><Lock size={48} /></div>
+          <h2 className="text-2xl font-black mb-4 text-yellow-500">Start Earning! 🚀</h2>
+          <p className="text-sm text-gray-400 mb-8">پیسے کمانے کے لیے اپنا پیکج ایکٹو کریں</p>
+          <button onClick={() => navigate('/plans')} className="w-full bg-yellow-500 text-[#0d0a1a] py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-transform">
+            View Plans
           </button>
         </div>
       </div>
@@ -127,55 +83,42 @@ const Ads = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#042f24] text-white p-4 pb-28">
+    <div className="min-h-screen bg-[#0d0a1a] text-white p-4 pb-28">
       <div className="flex items-center justify-between mb-6">
         <button onClick={() => navigate('/dashboard')} className="bg-white/5 p-2 rounded-full"><ArrowLeft size={20} /></button>
         <h2 className="text-xl font-black text-yellow-500">DAILY ADS ({completedAds.length}/6)</h2>
-        <div className="w-10"></div>
+        <div className="w-10" />
       </div>
 
       <div className="grid gap-3">
         {adLinks.map((link, index) => {
           const isCompleted = completedAds.includes(index);
           const isLocked = index > completedAds.length;
-
           return (
-            <div key={index} className={`p-4 rounded-[24px] border flex justify-between items-center transition-all ${isCompleted ? 'bg-green-600/10 border-green-500/30' : isLocked ? 'bg-white/3 border-white/5 opacity-40' : 'bg-[#1a3a32] border-yellow-500/20'}`}>
-              <div className="text-right flex-1">
-                <p className={`font-bold text-sm ${isLocked ? 'text-gray-500' : 'text-white'}`}>ایڈ نمبر {index + 1}</p>
-                {isCompleted && <p className="text-[10px] text-green-500 font-urdu">مکمل ✓</p>}
-                {isLocked && <p className="text-[10px] text-gray-500 font-urdu">پہلے پچھلا ایڈ دیکھیں</p>}
+            <div key={index} className={`p-4 rounded-2xl border flex justify-between items-center transition-all ${isCompleted ? 'bg-green-500/10 border-green-500/20' : isLocked ? 'bg-white/3 border-white/5 opacity-40' : 'bg-[#1a1035] border-yellow-500/20'}`}>
+              <div className="flex-1">
+                <p className={`font-bold text-sm ${isLocked ? 'text-gray-600' : 'text-white'}`}>Ad #{index + 1}</p>
+                {isCompleted && <p className="text-[10px] text-green-500">Completed ✓</p>}
+                {isLocked && <p className="text-[10px] text-gray-600">Watch previous ad first</p>}
               </div>
-              {isCompleted ? (
-                <CheckCircle2 className="text-green-500" size={24} />
-              ) : isLocked ? (
-                <Lock size={20} className="text-gray-600" />
-              ) : (
-                <button 
-                  onClick={() => { setActiveAdIndex(index); setTimeLeft(30); setIsTimerRunning(true); }} 
-                  className="bg-yellow-500 text-[#042f24] px-6 py-2 rounded-xl text-xs font-black shadow-md active:scale-95 transition-transform"
-                >
-                  WATCH
-                </button>
-              )}
+              {isCompleted ? <CheckCircle2 className="text-green-500" size={24} />
+                : isLocked ? <Lock size={20} className="text-gray-600" />
+                : <button onClick={() => { setActiveAdIndex(index); setTimeLeft(30); setIsTimerRunning(true); }}
+                    className="bg-yellow-500 text-[#0d0a1a] px-6 py-2 rounded-xl text-xs font-black active:scale-95 transition-transform">WATCH</button>}
             </div>
           );
         })}
       </div>
-      
+
       {activeAdIndex !== null && (
         <div className="fixed inset-0 bg-black z-[999] flex flex-col">
-          <div className="bg-yellow-500 text-[#042f24] p-4 flex justify-between items-center font-bold">
-            <span className="font-urdu">ایڈ چل رہا ہے...</span>
+          <div className="bg-yellow-500 text-[#0d0a1a] p-4 flex justify-between items-center font-bold">
+            <span>Watching Ad...</span>
             <span className="text-2xl font-black">{timeLeft}s</span>
           </div>
-          <iframe 
-            src={adLinks[activeAdIndex]} 
-            className="flex-1 w-full border-none" 
-            title="Advertisement"
-          />
-          <div className="p-4 bg-[#042f24] text-center text-xs text-yellow-500/60 font-urdu">
-            پیسے کمانے کے لیے {timeLeft} سیکنڈ مکمل ہونے کا انتظار کریں
+          <iframe src={adLinks[activeAdIndex]} className="flex-1 w-full border-none" title="Advertisement" />
+          <div className="p-4 bg-[#0d0a1a] text-center text-xs text-yellow-500/60">
+            Wait {timeLeft} seconds to earn reward
           </div>
         </div>
       )}
