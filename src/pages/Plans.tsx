@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { Star, ShieldCheck, Gem, Crown, Sparkles, X, Copy, Play } from 'lucide-react';
+import { Star, TrendingUp, Crown, Gem, Sparkles, X, Copy, Check } from 'lucide-react';
 import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
 
 const Plans = () => {
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [dbPlans, setDbPlans] = useState<any[]>([]);
+
+  const iconMap: Record<string, any> = { Star, TrendingUp, Gem, Crown, Sparkles };
 
   const plans = [
-    { name: "Basic", price: 2, pkr: 600, daily: 0.20, duration: 30, ads: 5, icon: <Star className="text-yellow-400" />, emoji: "⭐", color: "from-yellow-500/10" },
-    { name: "Standard", price: 4, pkr: 1200, daily: 0.45, duration: 30, ads: 10, icon: <ShieldCheck className="text-blue-400" />, emoji: "🛡️", color: "from-blue-500/10" },
-    { name: "Silver", price: 6, pkr: 1800, daily: 0.70, duration: 30, ads: 15, icon: <Sparkles className="text-gray-300" />, emoji: "🥈", color: "from-gray-300/10" },
-    { name: "Gold", price: 10, pkr: 3000, daily: 1.20, duration: 30, ads: 20, icon: <Gem className="text-yellow-500 animate-pulse" />, emoji: "✨", color: "from-yellow-600/20" },
-    { name: "Platinum", price: 20, pkr: 6000, daily: 2.50, duration: 30, ads: 25, icon: <Crown className="text-orange-400" />, emoji: "👑", color: "from-orange-500/20" },
+    { name: "Starter", price: 2, pkr: 600, daily: 0.15, totalReturn: 9, duration: 60, ads: 5, icon: "Star", featured: false },
+    { name: "Growth", price: 10, pkr: 2800, daily: 0.50, totalReturn: 30, duration: 60, ads: 10, icon: "TrendingUp", featured: true },
+    { name: "Silver", price: 6, pkr: 1800, daily: 0.35, totalReturn: 21, duration: 60, ads: 8, icon: "Sparkles", featured: false },
+    { name: "Gold", price: 25, pkr: 7000, daily: 1.25, totalReturn: 75, duration: 60, ads: 15, icon: "Gem", featured: false },
+    { name: "Platinum", price: 50, pkr: 14000, daily: 2.50, totalReturn: 150, duration: 60, ads: 20, icon: "Crown", featured: false },
   ];
 
   const copyNumber = () => {
@@ -24,42 +29,26 @@ const Plans = () => {
   };
 
   const handleConfirmDeposit = async () => {
-    if (!file) {
-      alert("براہ کرم ادائیگی کا اسکرین شاٹ اپ لوڈ کریں");
-      return;
-    }
-
+    if (!file) { alert("براہ کرم ادائیگی کا اسکرین شاٹ اپ لوڈ کریں"); return; }
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("لاگ ان ہونا ضروری ہے");
-
       const fileName = `deposit-${user.id}-${Date.now()}.${file.name.split('.').pop()}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('deposits') 
-        .upload(fileName, file);
-
+      const { error: uploadError } = await supabase.storage.from('deposits').upload(fileName, file);
       if (uploadError) throw uploadError;
-
       const { data: { publicUrl } } = supabase.storage.from('deposits').getPublicUrl(fileName);
-
-      const { error: dbError } = await supabase
-        .from('deposits')
-        .insert([{
-          user_id: user.id,
-          amount: selectedPlan.pkr,
-          transaction_id: `PLAN-${selectedPlan.name}-${Date.now()}`,
-          screenshot_url: publicUrl,
-          status: 'pending'
-        }]);
-
+      const { error: dbError } = await supabase.from('deposits').insert([{
+        user_id: user.id,
+        amount: selectedPlan.pkr,
+        transaction_id: `PLAN-${selectedPlan.name}-${Date.now()}`,
+        screenshot_url: publicUrl,
+        status: 'pending'
+      }]);
       if (dbError) throw dbError;
-
       alert("درخواست موصول ہوگئی ہے! ایڈمن جلد تصدیق کرے گا۔ ✅");
       setSelectedPlan(null);
       setFile(null);
-
     } catch (error: any) {
       alert("خرابی: " + (error.message || "اپ لوڈ نہیں ہو سکا"));
     } finally {
@@ -68,77 +57,116 @@ const Plans = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#064e3b] text-white p-4 pb-24 font-sans text-right">
-      <div className="text-center mb-8 pt-4">
-        <h2 className="text-3xl font-black text-yellow-500 italic uppercase">Gold Plus</h2>
-        <p className="text-[10px] opacity-60">بہترین انویسٹمنٹ، بہترین منافع</p>
-      </div>
-      
-      <div className="grid grid-cols-1 gap-4">
-        {plans.map((plan, index) => (
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            key={plan.name} 
-            className={`relative overflow-hidden bg-gradient-to-l ${plan.color} to-white/5 border border-white/10 p-5 rounded-[32px] flex justify-between items-center shadow-xl`}
-          >
-            <div className="absolute -right-2 -top-2 text-6xl opacity-5 rotate-12">{plan.emoji}</div>
-            <div className="z-10 text-right">
-              <div className="flex items-center gap-2 justify-end mb-1">
-                <h3 className="text-lg font-black">{plan.name} Plan</h3>
-                {plan.icon}
-              </div>
-              <p className="text-yellow-500 font-black text-lg">${plan.price} <span className="text-[10px] opacity-60">({plan.pkr} PKR)</span></p>
-              <div className="text-[10px] opacity-70 mt-1 space-y-1">
-                <p>روزانہ آمدنی: ${plan.daily}</p>
-                <p>مدت: {plan.duration} دن</p>
-                <p className="flex items-center justify-end gap-1"><Play size={10}/> {plan.ads} Ads</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setSelectedPlan(plan)} 
-              className="z-10 bg-yellow-600 text-[#064e3b] px-5 py-2 rounded-xl font-black text-[10px] shadow-lg active:scale-95 transition-all"
-            >
-              ایکٹیو کریں
-            </button>
-          </motion.div>
-        ))}
+    <div className="min-h-screen bg-[#0d0a1a] text-white pb-28">
+      {/* Header */}
+      <div className="bg-gradient-to-b from-[#2d1b69] to-[#1a1035] mx-4 mt-4 rounded-3xl p-5 border border-purple-500/20">
+        <div className="flex items-center justify-between">
+          <span className="text-yellow-500 font-black text-lg italic">Gold Plus</span>
+          <span className="text-gray-300 font-semibold">Plans</span>
+          <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-[#0d0a1a] font-black text-sm">U</div>
+        </div>
       </div>
 
+      <div className="px-4 mt-4">
+        <h2 className="text-xl font-black">Investment Plans</h2>
+        <p className="text-gray-500 text-xs">Choose a plan that fits your goals</p>
+      </div>
+
+      <div className="px-4 mt-4 space-y-4">
+        {plans.map((plan, index) => {
+          const Icon = iconMap[plan.icon] || Star;
+          return (
+            <motion.div
+              key={plan.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`relative bg-gradient-to-b from-[#2d1b69] to-[#1a1035] rounded-3xl p-5 border ${plan.featured ? 'border-yellow-500/50' : 'border-purple-500/20'} shadow-xl`}
+            >
+              {plan.featured && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-[#0d0a1a] text-[10px] font-black px-4 py-1 rounded-full uppercase">
+                  Most Popular
+                </div>
+              )}
+
+              {/* Plan Header */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${plan.featured ? 'bg-yellow-500' : 'bg-purple-500/20'}`}>
+                  <Icon size={24} className={plan.featured ? 'text-[#0d0a1a]' : 'text-yellow-500'} />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg">{plan.name}</h3>
+                  <p className="text-yellow-500 font-black text-xl">${plan.price} <span className="text-gray-500 text-xs font-normal">/ Rs. {plan.pkr.toLocaleString()}</span></p>
+                </div>
+              </div>
+
+              {/* Stats Row */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
+                  <p className="text-[9px] text-gray-500 uppercase">Daily</p>
+                  <p className="text-green-400 font-black text-sm">${plan.daily.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600">Rs. {(plan.daily * 280).toFixed(0)}</p>
+                </div>
+                <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
+                  <p className="text-[9px] text-gray-500 uppercase">Total</p>
+                  <p className="text-green-400 font-black text-sm">${plan.totalReturn.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600">Rs. {(plan.totalReturn * 280).toFixed(0)}</p>
+                </div>
+                <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
+                  <p className="text-[9px] text-gray-500 uppercase">Duration</p>
+                  <p className="text-white font-black text-sm">{plan.duration} days</p>
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="space-y-1.5 mb-4">
+                {['Daily profit payout', '24/7 withdrawal', 'Referral bonus'].map(f => (
+                  <p key={f} className="text-xs text-gray-400 flex items-center gap-2">
+                    <span className="text-green-400">✓</span> {f}
+                  </p>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setSelectedPlan(plan)}
+                className={`w-full py-3.5 rounded-2xl font-black text-sm active:scale-95 transition-transform ${
+                  plan.featured
+                    ? 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20'
+                    : 'bg-yellow-500 text-[#0d0a1a]'
+                }`}
+              >
+                Activate Plan
+              </button>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Payment Modal */}
       {selectedPlan && (
         <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-5 z-50 backdrop-blur-sm">
-          <div className="bg-[#064e3b] border-2 border-yellow-500/50 w-full max-w-sm rounded-[40px] p-8 relative shadow-2xl">
-            <button onClick={() => setSelectedPlan(null)} className="absolute top-6 left-6 opacity-40 text-white hover:opacity-100 transition-opacity"><X size={24}/></button>
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-black text-yellow-500">{selectedPlan.name} پلان</h3>
-              <p className="text-xs opacity-60 mt-1">رقم بھیجیں اور اسکرین شاٹ لگائیں</p>
+          <div className="bg-[#1a1035] border border-purple-500/30 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
+            <button onClick={() => setSelectedPlan(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X size={24} /></button>
+            <div className="text-center mb-5">
+              <h3 className="text-xl font-black text-yellow-500">{selectedPlan.name} Plan</h3>
+              <p className="text-xs text-gray-500 mt-1">رقم بھیجیں اور اسکرین شاٹ لگائیں</p>
             </div>
-            
-            <div className="bg-black/30 p-5 rounded-3xl text-center mb-6 border border-white/5 font-urdu">
-              <p className="text-[10px] mb-2 opacity-50">نمبر: 03037264598</p>
-              <button onClick={copyNumber} className="bg-yellow-600/20 text-yellow-500 text-[10px] px-4 py-1 rounded-full border border-yellow-500/30 mb-2">
-                {copied ? "کاپی ہوا ✅" : "نمبر کاپی کریں"}
+            <div className="bg-black/30 p-4 rounded-2xl text-center mb-4 border border-white/5">
+              <p className="text-[10px] text-gray-500 mb-1">نمبر: 03037264598</p>
+              <button onClick={copyNumber} className="bg-yellow-500/20 text-yellow-500 text-[10px] px-4 py-1 rounded-full border border-yellow-500/30 mb-2">
+                {copied ? "Copied ✅" : "Copy Number"}
               </button>
-              <p className="text-[11px] opacity-70">نام: Ahmad Nafees Anjum</p>
+              <p className="text-[10px] text-gray-500">Ahmad Nafees Anjum</p>
+              <p className="text-yellow-500 font-black text-lg mt-2">PKR {selectedPlan.pkr.toLocaleString()}</p>
             </div>
-
-            <div className="space-y-4">
-              <div className="relative border-2 border-dashed border-white/10 rounded-2xl p-4 text-center">
-                <input 
-                  type="file" 
-                  onChange={(e) => setFile(e.target.files?.[0] || null)} 
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                  accept="image/*" 
-                />
-                <p className="text-[10px] opacity-60">{file ? file.name : "اسکرین شاٹ یہاں اپ لوڈ کریں"}</p>
+            <div className="space-y-3">
+              <div className="relative border-2 border-dashed border-white/10 rounded-2xl p-4 text-center cursor-pointer">
+                <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" />
+                <p className="text-[10px] text-gray-500">{file ? `✅ ${file.name}` : "اسکرین شاٹ یہاں اپ لوڈ کریں"}</p>
               </div>
-              <button 
-                onClick={handleConfirmDeposit} 
-                disabled={loading} 
-                className={`w-full py-4 rounded-2xl font-black text-lg transition-all ${loading ? 'bg-gray-700 opacity-50' : 'bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20'}`}
-              >
-                {loading ? "انتظار کریں..." : "کنفرم کریں"}
+              <button onClick={handleConfirmDeposit} disabled={loading}
+                className={`w-full py-4 rounded-2xl font-black text-sm transition-all ${loading ? 'bg-gray-700 opacity-50' : 'bg-yellow-500 text-[#0d0a1a] shadow-lg'}`}>
+                {loading ? "Processing..." : "Confirm Payment"}
               </button>
             </div>
           </div>

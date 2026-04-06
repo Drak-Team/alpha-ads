@@ -11,107 +11,60 @@ const Withdraw = () => {
   const [loading, setLoading] = useState(false);
 
   const handleWithdraw = async () => {
-    if (!amount || !accountNumber) {
-      alert("براہ کرم تمام معلومات درست طریقے سے پر کریں!");
-      return;
-    }
-    if (Number(amount) < 1) {
-      alert("کم از کم ودھرا $1 ہونا چاہیے");
-      return;
-    }
-
+    if (!amount || !accountNumber) { alert("تمام معلومات درست طریقے سے پر کریں!"); return; }
+    if (Number(amount) < 300) { alert("کم از کم ودھرا PKR 300 ہونا چاہیے"); return; }
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("لاگ ان ہونا ضروری ہے");
-
-      const fee = 0;
-      const payout = Number(amount) * 300; // PKR conversion
-
-      const { error } = await supabase
-        .from('withdrawals')
-        .insert({
-          user_id: user.id,
-          amount: Number(amount),
-          method,
-          account_number: accountNumber,
-          fee,
-          payout,
-          status: 'pending'
-        });
-
+      const { error } = await supabase.from('withdrawals').insert({
+        user_id: user.id, amount: Number(amount), method, account_number: accountNumber,
+        fee: 0, payout: Number(amount), status: 'pending'
+      });
       if (error) throw error;
-
-      alert("آپ کی ودھرا ریکوسٹ موصول ہو گئی ہے! 12 سے 24 گھنٹے میں رقم منتقل کر دی جائے گی۔");
+      alert("ودھرا ریکوسٹ موصول! 12-24 گھنٹے میں رقم منتقل ہو جائے گی۔ ✅");
       navigate('/dashboard');
     } catch (error: any) {
-      alert("کچھ غلط ہو گیا: " + (error.message || "دوبارہ کوشش کریں"));
-    } finally {
-      setLoading(false);
-    }
+      alert("خرابی: " + (error.message || "دوبارہ کوشش کریں"));
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-[#042f24] text-white p-6 font-sans pb-24">
-      <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-full mb-6">
-        <ArrowLeft size={24} />
-      </button>
+    <div className="min-h-screen bg-[#0d0a1a] text-white p-5 pb-28">
+      <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-full mb-4"><ArrowLeft size={22} /></button>
+      <h2 className="text-2xl font-black text-yellow-500 mb-5 text-center">WITHDRAW</h2>
 
-      <h2 className="text-2xl font-black text-yellow-500 mb-6 text-center">WITHDRAW CASH</h2>
-
-      <div className="flex gap-4 mb-8">
-        <button 
-          onClick={() => setMethod('easypaisa')} 
-          className={`flex-1 p-4 rounded-2xl border-2 transition-all font-bold ${method === 'easypaisa' ? 'bg-green-600 border-yellow-500 shadow-lg scale-105' : 'bg-[#1a3a32] border-white/10 opacity-60'}`}
-        >
+      <div className="flex gap-3 mb-5">
+        <button onClick={() => setMethod('easypaisa')}
+          className={`flex-1 p-4 rounded-2xl border-2 font-bold transition-all ${method === 'easypaisa' ? 'bg-green-600 border-yellow-500 scale-105' : 'bg-[#1a1035] border-purple-500/20 opacity-60'}`}>
           EasyPaisa
         </button>
-        <button 
-          onClick={() => setMethod('jazzcash')} 
-          className={`flex-1 p-4 rounded-2xl border-2 transition-all font-bold ${method === 'jazzcash' ? 'bg-orange-600 border-yellow-500 shadow-lg scale-105' : 'bg-[#1a3a32] border-white/10 opacity-60'}`}
-        >
+        <button onClick={() => setMethod('jazzcash')}
+          className={`flex-1 p-4 rounded-2xl border-2 font-bold transition-all ${method === 'jazzcash' ? 'bg-orange-600 border-yellow-500 scale-105' : 'bg-[#1a1035] border-purple-500/20 opacity-60'}`}>
           JazzCash
         </button>
       </div>
 
-      <div className="space-y-4 bg-[#1a3a32] p-6 rounded-[35px] border border-white/10 shadow-2xl">
+      <div className="bg-[#1a1035] p-6 rounded-3xl border border-purple-500/20 space-y-4">
         <div>
-          <label className="text-[10px] text-yellow-500 font-bold uppercase ml-2">{method} Number</label>
-          <input 
-            type="tel" 
-            placeholder="اکاؤنٹ نمبر لکھیں"
-            className="w-full bg-[#042f24] border border-white/10 p-4 rounded-2xl focus:border-yellow-500 outline-none"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-          />
+          <label className="text-[10px] text-yellow-500 font-bold uppercase mb-2 block">{method} Number</label>
+          <input type="tel" placeholder="اکاؤنٹ نمبر" value={accountNumber} onChange={e => setAccountNumber(e.target.value)}
+            className="w-full bg-black/30 border border-white/10 p-4 rounded-2xl focus:outline-none focus:border-yellow-500/50" />
         </div>
-
         <div>
-          <label className="text-[10px] text-yellow-500 font-bold uppercase ml-2">Amount ($)</label>
-          <input 
-            type="number" 
-            placeholder="رقم (ڈالر میں) لکھیں"
-            className="w-full bg-[#042f24] border border-white/10 p-4 rounded-2xl focus:border-yellow-500 outline-none"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-          <p className="text-[10px] text-green-400 mt-2 font-urdu text-right">موجودہ ریٹ: $1 = 300 PKR</p>
+          <label className="text-[10px] text-yellow-500 font-bold uppercase mb-2 block">Amount (PKR)</label>
+          <input type="number" placeholder="رقم (PKR)" value={amount} onChange={e => setAmount(e.target.value)}
+            className="w-full bg-black/30 border border-white/10 p-4 rounded-2xl focus:outline-none focus:border-yellow-500/50" />
         </div>
-
-        <button 
-          onClick={handleWithdraw}
-          disabled={loading}
-          className="w-full bg-yellow-500 text-[#042f24] font-black py-4 rounded-2xl mt-4 shadow-xl active:scale-95 transition-transform disabled:opacity-50"
-        >
-          {loading ? "PROCESSING..." : "CONFIRM WITHDRAW"}
+        <button onClick={handleWithdraw} disabled={loading}
+          className="w-full bg-yellow-500 text-[#0d0a1a] font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-transform disabled:opacity-50">
+          {loading ? "Processing..." : "CONFIRM WITHDRAW"}
         </button>
       </div>
 
-      <div className="mt-8 flex gap-3 p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
-        <AlertCircle className="text-blue-500 shrink-0" size={20} />
-        <p className="text-[10px] text-blue-500/80 font-urdu leading-relaxed">
-          ودھرا کی رقم آپ کے دیے گئے اکاؤنٹ میں 24 گھنٹوں کے اندر منتقل کر دی جائے گی۔
-        </p>
+      <div className="mt-6 flex gap-3 p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+        <AlertCircle className="text-blue-400 shrink-0" size={18} />
+        <p className="text-[10px] text-blue-400/80 leading-relaxed">رقم 24 گھنٹوں کے اندر منتقل کر دی جائے گی۔</p>
       </div>
     </div>
   );
