@@ -52,6 +52,7 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          payment_method: string
           screenshot_url: string | null
           status: Database["public"]["Enums"]["deposit_status"]
           transaction_id: string | null
@@ -62,6 +63,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          payment_method?: string
           screenshot_url?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
           transaction_id?: string | null
@@ -72,6 +74,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          payment_method?: string
           screenshot_url?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
           transaction_id?: string | null
