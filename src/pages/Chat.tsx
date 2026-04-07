@@ -28,7 +28,7 @@ const Chat = () => {
         </a>
 
         {/* کمیونٹی گروپ کارڈ */}
-        <a href="#" className="bg-gradient-to-br from-purple-600/20 to-purple-900/40 border border-purple-500/20 p-6 rounded-[35px] block shadow-2xl active:scale-95 transition-all">
+        <a href="https://whatsapp.com/channel/0029VbCAU3sAYlUQQImhoL0l" target="_blank" rel="noreferrer" className="bg-gradient-to-br from-purple-600/20 to-purple-900/40 border border-purple-500/20 p-6 rounded-[35px] block shadow-2xl active:scale-95 transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-purple-600 p-3 rounded-2xl shadow-lg shadow-purple-600/20"><Users size={24} /></div>
             <div className="text-right">

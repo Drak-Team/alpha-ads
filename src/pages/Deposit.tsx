@@ -5,17 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Deposit = () => {
   const navigate = useNavigate();
-  const [copied, setCopied] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const myNumber = "03037264598";
+  const binanceId = "319230893";
 
-  const copyNumber = () => {
-    navigator.clipboard.writeText(myNumber);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyToClipboard = (text: string, field = 'phone') => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const handleDeposit = async () => {
@@ -48,14 +49,24 @@ const Deposit = () => {
 
       <div className="bg-[#1a1035] p-5 rounded-3xl border border-purple-500/20 mb-5">
         <p className="text-gray-500 text-xs mb-3 text-center">نیچے دیے گئے نمبر پر رقم بھیجیں</p>
-        <div className="bg-black/30 p-4 rounded-2xl flex justify-between items-center border border-purple-500/10">
+        <div className="bg-black/30 p-4 rounded-2xl flex justify-between items-center border border-purple-500/10 mb-3">
           <div>
             <p className="text-[10px] text-yellow-500 font-bold">EasyPaisa / JazzCash</p>
             <p className="text-lg font-mono font-bold tracking-widest">{myNumber}</p>
             <p className="text-[10px] text-gray-600">Ahmad Nafees Anjum</p>
           </div>
-          <button onClick={copyNumber} className="bg-yellow-500 text-[#0d0a1a] p-3 rounded-xl">
-            {copied ? <Check size={20} /> : <Copy size={20} />}
+          <button onClick={() => copyToClipboard(myNumber)} className="bg-yellow-500 text-[#0d0a1a] p-3 rounded-xl">
+            {copiedField === 'phone' ? <Check size={20} /> : <Copy size={20} />}
+          </button>
+        </div>
+        <div className="bg-black/30 p-4 rounded-2xl flex justify-between items-center border border-yellow-500/10">
+          <div>
+            <p className="text-[10px] text-yellow-500 font-bold">Binance ID (USDT)</p>
+            <p className="text-lg font-mono font-bold tracking-widest">{binanceId}</p>
+            <p className="text-[10px] text-gray-600">Crypto Deposit</p>
+          </div>
+          <button onClick={() => copyToClipboard(binanceId, 'binance')} className="bg-yellow-500 text-[#0d0a1a] p-3 rounded-xl">
+            {copiedField === 'binance' ? <Check size={20} /> : <Copy size={20} />}
           </button>
         </div>
       </div>
