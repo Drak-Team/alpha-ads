@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 
-const WHATSAPP_LINK = "https://whatsapp.com/channel/0029VbC0B8W0lwgqZKuScy0T";
+const WHATSAPP_LINK = "https://whatsapp.com/channel/0029VbCAU3sAYlUQQImhoL0l";
 
 const WhatsAppFloat = () => (
   <a
