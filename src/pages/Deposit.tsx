@@ -10,6 +10,7 @@ const Deposit = () => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState('');
   const [transactionId, setTransactionId] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'easypaisa' | 'jazzcash' | 'binance'>('easypaisa');
   const myNumber = "03037264598";
   const binanceId = "319230893";
 
@@ -32,7 +33,7 @@ const Deposit = () => {
       const { data: { publicUrl } } = supabase.storage.from('deposits').getPublicUrl(fileName);
       const { error: dbError } = await supabase.from('deposits').insert([{
         user_id: user.id, amount: Number(amount), transaction_id: transactionId || null,
-        screenshot_url: publicUrl, status: 'pending'
+        screenshot_url: publicUrl, status: 'pending', payment_method: paymentMethod
       }]);
       if (dbError) throw dbError;
       alert("درخواست موصول ہو گئی! 24 گھنٹے میں تصدیق ہو جائے گی۔ ✅");
@@ -72,6 +73,21 @@ const Deposit = () => {
       </div>
 
       <div className="bg-[#1a1035] p-6 rounded-3xl border border-purple-500/20">
+        <div className="mb-4">
+          <label className="text-[10px] text-yellow-500 font-bold mb-2 block">Payment Method</label>
+          <div className="flex gap-2">
+            {([
+              { key: 'easypaisa', label: 'EasyPaisa', color: 'bg-green-600' },
+              { key: 'jazzcash', label: 'JazzCash', color: 'bg-orange-600' },
+              { key: 'binance', label: 'Binance', color: 'bg-yellow-600' },
+            ] as const).map(m => (
+              <button key={m.key} onClick={() => setPaymentMethod(m.key)}
+                className={`flex-1 py-3 rounded-2xl font-bold text-xs transition-all ${paymentMethod === m.key ? `${m.color} border-2 border-yellow-400 scale-105` : 'bg-black/30 border border-white/10 opacity-50'}`}>
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="mb-4">
           <label className="text-[10px] text-yellow-500 font-bold mb-2 block">Amount (PKR)</label>
           <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="مثلاً 1000"

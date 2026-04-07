@@ -156,8 +156,11 @@ const AdminPanel = () => {
               <div key={dep.id} className="bg-[#1a1035] border border-purple-500/10 p-5 rounded-2xl">
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-yellow-500 font-bold text-lg">PKR {dep.amount}</span>
-                  <span className="text-[10px] opacity-40">{dep.transaction_id || 'N/A'}</span>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${dep.payment_method === 'binance' ? 'bg-yellow-600 text-[#0d0a1a]' : dep.payment_method === 'jazzcash' ? 'bg-orange-600 text-white' : 'bg-green-600 text-white'}`}>
+                    {dep.payment_method || 'easypaisa'}
+                  </span>
                 </div>
+                <p className="text-[10px] opacity-40 mb-2">TXN: {dep.transaction_id || 'N/A'}</p>
                 {dep.screenshot_url && (
                   <a href={dep.screenshot_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-blue-400 text-xs mb-3">
                     <Image size={14} /> View Screenshot
