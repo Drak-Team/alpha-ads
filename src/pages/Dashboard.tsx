@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, User, Send, MessageCircle, Gift, PlayCircle, X, CheckCircle, Clock, AlertTriangle, Crown } from 'lucide-react';
+import { Bell, User, Send, MessageCircle, Gift, PlayCircle, X, CheckCircle, Clock, AlertTriangle, Crown, History } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import banner1 from "@/assets/banner1.jpg";
 import banner2 from "@/assets/banner2.jpg";
@@ -16,9 +16,12 @@ const Dashboard = () => {
   const [displayName, setDisplayName] = useState("Investor");
   const [currentBanner, setCurrentBanner] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showTransactions, setShowTransactions] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [adsDone, setAdsDone] = useState(false);
+  const [activePlan, setActivePlan] = useState<string | null>(null);
 
   const banners = [banner1, banner2, banner3];
 
@@ -32,6 +35,7 @@ const Dashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Profile - single source of truth for balance
       const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
       if (profile) {
         setBalance(profile.balance || 0);
@@ -39,29 +43,43 @@ const Dashboard = () => {
         setDisplayName(profile.display_name || "Investor");
       }
 
-      const { data: deps } = await supabase.from('deposits').select('amount, status, created_at, id').eq('user_id', user.id).order('created_at', { ascending: false });
+      // Approved deposits total
+      const { data: deps } = await supabase.from('deposits').select('amount, status, created_at, id, payment_method').eq('user_id', user.id).order('created_at', { ascending: false });
       const approvedDeps = deps?.filter(d => d.status === 'approved') || [];
-      setTotalDeposit(approvedDeps.reduce((s, d) => s + d.amount, 0));
+      setTotalDeposit(approvedDeps.reduce((s, d) => s + (d.amount || 0), 0));
 
+      // Approved withdrawals total
       const { data: wds } = await supabase.from('withdrawals').select('payout, status, requested_at, id, method, account_number').eq('user_id', user.id).order('requested_at', { ascending: false });
       const approvedWds = wds?.filter(w => w.status === 'approved') || [];
-      setTotalWithdraw(approvedWds.reduce((s, w) => s + w.payout, 0));
+      setTotalWithdraw(approvedWds.reduce((s, w) => s + (w.payout || 0), 0));
 
+      // Team count
       const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('referred_by', user.id);
       setTeamCount(count || 0);
 
+      // Active plan name
+      const { data: activeSub } = await supabase.from('subscriptions').select('plan_id, plans(name)').eq('user_id', user.id).eq('is_active', true).maybeSingle();
+      if (activeSub && activeSub.plans) {
+        setActivePlan((activeSub.plans as any).name);
+      }
+
+      // Ads done today
       const today = new Date().toISOString().split('T')[0];
       const { data: adData } = await supabase.from('ad_watches').select('all_completed').eq('user_id', user.id).eq('watched_date', today).maybeSingle();
       if (adData?.all_completed) setAdsDone(true);
 
-      // Notifications
+      // Transaction history
+      const { data: txns } = await supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50);
+      setTransactions(txns || []);
+
+      // Notifications from deposits & withdrawals
       const notifs: any[] = [];
       deps?.forEach(d => {
         notifs.push({
           id: d.id, type: 'deposit',
           icon: d.status === 'approved' ? 'success' : d.status === 'rejected' ? 'error' : 'pending',
           title: d.status === 'approved' ? 'Deposit Approved ✅' : d.status === 'rejected' ? 'Deposit Rejected ❌' : 'Deposit Pending ⏳',
-          detail: `PKR ${d.amount}`, time: d.created_at,
+          detail: `PKR ${d.amount || 0} — ${d.payment_method || 'easypaisa'}`, time: d.created_at,
         });
       });
       wds?.forEach(w => {
@@ -69,7 +87,7 @@ const Dashboard = () => {
           id: w.id, type: 'withdrawal',
           icon: w.status === 'approved' ? 'success' : w.status === 'rejected' ? 'error' : 'pending',
           title: w.status === 'approved' ? 'Withdrawal Approved ✅' : w.status === 'rejected' ? 'Withdrawal Rejected ❌' : 'Withdrawal Pending ⏳',
-          detail: `PKR ${w.payout}`, time: w.requested_at,
+          detail: `PKR ${w.payout || 0} — ${w.method}`, time: w.requested_at,
         });
       });
       notifs.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
@@ -81,10 +99,10 @@ const Dashboard = () => {
 
   const stats = [
     { label: 'Total Balance', value: `PKR ${balance}`, color: 'text-green-400' },
-    { label: "Today's Earning", value: `PKR 0`, color: 'text-yellow-500' },
+    { label: 'Total Earned', value: `PKR ${totalEarned}`, color: 'text-yellow-500' },
     { label: 'Total Deposit', value: `PKR ${totalDeposit}`, color: 'text-blue-400' },
     { label: 'Total Withdraw', value: `PKR ${totalWithdraw}`, color: 'text-red-400' },
-    { label: 'Active Investment', value: `PKR ${totalDeposit}`, color: 'text-purple-400' },
+    { label: 'Active Plan', value: activePlan || 'None', color: 'text-purple-400' },
     { label: 'My Team', value: `${teamCount}`, color: 'text-orange-400' },
   ];
 
@@ -99,6 +117,9 @@ const Dashboard = () => {
           <span className="italic font-black text-yellow-500 text-lg">GOLD PLUS</span>
         </div>
         <div className="flex gap-3">
+          <button onClick={() => setShowTransactions(true)} className="p-2 bg-[#1a1035] rounded-full border border-purple-500/20">
+            <History size={20} className="text-gray-400" />
+          </button>
           <button onClick={() => setShowNotifications(true)} className="relative p-2 bg-[#1a1035] rounded-full border border-purple-500/20">
             <Bell size={20} className="text-gray-400" />
             {unreadCount > 0 && (
@@ -184,6 +205,38 @@ const Dashboard = () => {
                     <p className="text-[10px] text-yellow-500 font-bold">{n.detail}</p>
                     <p className="text-[9px] text-gray-600 mt-1">{new Date(n.time).toLocaleDateString()}</p>
                   </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Transaction History Modal */}
+      {showTransactions && (
+        <div className="fixed inset-0 bg-black/90 z-[60] flex flex-col backdrop-blur-sm">
+          <div className="flex items-center justify-between p-4 border-b border-purple-500/20">
+            <button onClick={() => setShowTransactions(false)} className="p-2"><X size={24} /></button>
+            <h3 className="text-lg font-bold text-yellow-500">Transaction History</h3>
+            <div className="w-10" />
+          </div>
+          <div className="flex-1 overflow-auto p-4 space-y-3">
+            {transactions.length === 0 ? (
+              <p className="text-center text-white/30 mt-20">No transactions yet</p>
+            ) : (
+              transactions.map((t) => (
+                <div key={t.id} className="bg-[#1a1035] p-4 rounded-2xl border border-purple-500/10 flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${t.type === 'deposit' ? 'bg-green-500/20 text-green-500' : t.type === 'plan_purchase' ? 'bg-purple-500/20 text-purple-400' : t.type === 'rank_reward' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-400'}`}>
+                    {t.type === 'deposit' ? <CheckCircle size={20} /> : t.type === 'plan_purchase' ? <Gift size={20} /> : <History size={20} />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold capitalize">{t.type.replace('_', ' ')}</p>
+                    <p className="text-[10px] text-gray-500">{t.description}</p>
+                    <p className="text-[9px] text-gray-600 mt-1">{new Date(t.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <p className={`font-black text-sm ${t.type === 'deposit' || t.type === 'rank_reward' ? 'text-green-400' : 'text-red-400'}`}>
+                    {t.type === 'deposit' || t.type === 'rank_reward' ? '+' : '-'}PKR {t.amount}
+                  </p>
                 </div>
               ))
             )}

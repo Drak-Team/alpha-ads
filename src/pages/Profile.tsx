@@ -16,6 +16,7 @@ const Profile = () => {
   const [newName, setNewName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [activePlan, setActivePlan] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -32,6 +33,11 @@ const Profile = () => {
       }
       const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('referred_by', user.id);
       setTeamCount(count || 0);
+
+      const { data: activeSub } = await supabase.from('subscriptions').select('plan_id, plans(name)').eq('user_id', user.id).eq('is_active', true).maybeSingle();
+      if (activeSub && activeSub.plans) {
+        setActivePlan((activeSub.plans as any).name);
+      }
     };
     fetchProfile();
   }, []);
@@ -65,9 +71,9 @@ const Profile = () => {
 
   const menuItems = [
     { icon: Users, label: 'My Team', action: () => navigate('/refer') },
-    { icon: Award, label: 'Ranks & Rewards', action: () => {} },
+    { icon: Award, label: 'Ranks & Rewards', action: () => navigate('/refer') },
     { icon: FileText, label: 'Deposit History', action: () => navigate('/deposit') },
-    { icon: TrendingUp, label: 'Transactions', action: () => {} },
+    { icon: TrendingUp, label: 'Transactions', action: () => navigate('/dashboard') },
     { icon: Edit3, label: 'Edit Profile', action: () => setShowEdit(true) },
     { icon: Lock, label: 'Change Password', action: () => setShowPassword(true) },
     { icon: Headphones, label: 'Support', action: () => navigate('/chat') },
@@ -92,6 +98,9 @@ const Profile = () => {
           <div>
             <h2 className="text-xl font-black">{displayName}</h2>
             <p className="text-gray-400 text-xs flex items-center gap-1">✉ {email}</p>
+            {activePlan && (
+              <p className="text-[10px] text-green-400 font-bold mt-0.5">✅ {activePlan} Plan Active</p>
+            )}
             <button onClick={copyCode} className="flex items-center gap-1 mt-1 bg-white/10 px-3 py-0.5 rounded-full">
               <span className="text-yellow-500 text-[10px] font-mono font-bold"># {referralCode}</span>
               <Copy size={10} className={copied ? 'text-green-400' : 'text-gray-400'} />
@@ -99,20 +108,17 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Stats Row */}
+        {/* Stats Row - PKR values */}
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
-            <p className="text-[10px] text-gray-400">$</p>
-            <p className="text-green-400 font-black text-sm">${balance.toFixed(2)}</p>
-            <p className="text-[9px] text-gray-500 uppercase">Invested</p>
+            <p className="text-green-400 font-black text-sm">PKR {balance.toLocaleString()}</p>
+            <p className="text-[9px] text-gray-500 uppercase">Balance</p>
           </div>
           <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
-            <p className="text-[10px] text-gray-400">$</p>
-            <p className="text-green-400 font-black text-sm">${totalEarned.toFixed(2)}</p>
+            <p className="text-green-400 font-black text-sm">PKR {totalEarned.toLocaleString()}</p>
             <p className="text-[9px] text-gray-500 uppercase">Earned</p>
           </div>
           <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
-            <p className="text-[10px] text-gray-400">👥</p>
             <p className="text-white font-black text-sm">{teamCount}</p>
             <p className="text-[9px] text-gray-500 uppercase">Team</p>
           </div>
