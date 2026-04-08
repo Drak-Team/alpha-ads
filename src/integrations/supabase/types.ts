@@ -152,6 +152,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rank_rewards: {
+        Row: {
+          claimed: boolean
+          claimed_at: string | null
+          created_at: string
+          id: string
+          rank_level: number
+          reward_amount: number
+          user_id: string
+        }
+        Insert: {
+          claimed?: boolean
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          rank_level: number
+          reward_amount?: number
+          user_id: string
+        }
+        Update: {
+          claimed?: boolean
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          rank_level?: number
+          reward_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           bonus_amount: number
@@ -259,6 +289,33 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_salaries: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          paid: boolean
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          paid?: boolean
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          paid?: boolean
+          user_id?: string
+          week_start?: string
         }
         Relationships: []
       }
