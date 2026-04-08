@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { Star, TrendingUp, Crown, Gem, Sparkles, X, Copy, Check } from 'lucide-react';
+import { Star, TrendingUp, Crown, Gem, Sparkles, X, CheckCircle } from 'lucide-react';
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 
 const Plans = () => {
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
-  const [copied, setCopied] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [activeSubs, setActiveSubs] = useState<string[]>([]);
   const [dbPlans, setDbPlans] = useState<any[]>([]);
 
   const iconMap: Record<string, any> = { Star, TrendingUp, Gem, Crown, Sparkles };
 
-  const plans = [
+  const defaultPlans = [
     { name: "Starter", price: 2, pkr: 600, daily: 0.15, totalReturn: 9, duration: 60, ads: 5, icon: "Star", featured: false },
     { name: "Growth", price: 10, pkr: 2800, daily: 0.50, totalReturn: 30, duration: 60, ads: 10, icon: "TrendingUp", featured: true },
     { name: "Silver", price: 6, pkr: 1800, daily: 0.35, totalReturn: 21, duration: 60, ads: 8, icon: "Sparkles", featured: false },
@@ -22,35 +22,101 @@ const Plans = () => {
     { name: "Platinum", price: 50, pkr: 14000, daily: 2.50, totalReturn: 150, duration: 60, ads: 20, icon: "Crown", featured: false },
   ];
 
-  const copyNumber = () => {
-    navigator.clipboard.writeText("03037264598");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase.from('profiles').select('balance').eq('id', user.id).maybeSingle();
+    if (profile) setBalance(profile.balance || 0);
+
+    // Get active subscriptions
+    const { data: subs } = await supabase.from('subscriptions').select('plan_id, is_active, expires_at').eq('user_id', user.id).eq('is_active', true);
+    if (subs) setActiveSubs(subs.map(s => s.plan_id));
+
+    // Get DB plans
+    const { data: plans } = await supabase.from('plans').select('*');
+    if (plans) setDbPlans(plans);
   };
 
-  const handleConfirmDeposit = async () => {
-    if (!file) { alert("براہ کرم ادائیگی کا اسکرین شاٹ اپ لوڈ کریں"); return; }
+  const handleActivate = async (plan: any) => {
+    if (balance < plan.pkr) {
+      alert(`بیلنس کم ہے! آپ کا بیلنس PKR ${balance} ہے۔ پہلے ڈپازٹ کریں۔`);
+      navigate('/deposit');
+      return;
+    }
+    setSelectedPlan(plan);
+  };
+
+  const confirmActivation = async () => {
+    if (!selectedPlan) return;
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("لاگ ان ہونا ضروری ہے");
-      const fileName = `deposit-${user.id}-${Date.now()}.${file.name.split('.').pop()}`;
-      const { error: uploadError } = await supabase.storage.from('deposits').upload(fileName, file);
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('deposits').getPublicUrl(fileName);
-      const { error: dbError } = await supabase.from('deposits').insert([{
+
+      // Find or create plan in DB
+      let planId: string;
+      const existingPlan = dbPlans.find(p => p.name === selectedPlan.name);
+      if (existingPlan) {
+        planId = existingPlan.id;
+      } else {
+        const { data: newPlan, error: planErr } = await supabase.from('plans').insert([{
+          name: selectedPlan.name,
+          price: selectedPlan.pkr,
+          daily_earning: Math.round(selectedPlan.daily * 280),
+          duration_days: selectedPlan.duration,
+          daily_ads: selectedPlan.ads,
+        }]).select().single();
+        if (planErr) throw planErr;
+        planId = newPlan.id;
+      }
+
+      // Check if already subscribed
+      const { data: existingSub } = await supabase.from('subscriptions')
+        .select('id').eq('user_id', user.id).eq('plan_id', planId).eq('is_active', true).maybeSingle();
+      if (existingSub) {
+        alert("یہ پیکج پہلے سے ایکٹیو ہے! ✅");
+        setSelectedPlan(null);
+        setLoading(false);
+        return;
+      }
+
+      // Deduct balance
+      const { error: balErr } = await supabase.from('profiles')
+        .update({ balance: balance - selectedPlan.pkr })
+        .eq('id', user.id);
+      if (balErr) throw balErr;
+
+      // Create subscription
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + selectedPlan.duration);
+      
+      const { error: subErr } = await supabase.from('subscriptions').insert([{
         user_id: user.id,
-        amount: selectedPlan.pkr,
-        transaction_id: `PLAN-${selectedPlan.name}-${Date.now()}`,
-        screenshot_url: publicUrl,
-        status: 'pending'
+        plan_id: planId,
+        started_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+        is_active: true,
       }]);
-      if (dbError) throw dbError;
-      alert("درخواست موصول ہوگئی ہے! ایڈمن جلد تصدیق کرے گا۔ ✅");
+      if (subErr) throw subErr;
+
+      // Log transaction
+      await supabase.from('transactions').insert([{
+        user_id: user.id,
+        type: 'plan_purchase',
+        amount: selectedPlan.pkr,
+        description: `${selectedPlan.name} Plan activated - PKR ${selectedPlan.pkr}`,
+      }]);
+
+      alert(`${selectedPlan.name} پیکج ایکٹیو ہو گیا! ✅\nPKR ${selectedPlan.pkr} بیلنس سے کٹوتی ہوئی۔`);
       setSelectedPlan(null);
-      setFile(null);
+      fetchData(); // Refresh
     } catch (error: any) {
-      alert("خرابی: " + (error.message || "اپ لوڈ نہیں ہو سکا"));
+      alert("خرابی: " + (error.message || "ایکٹیویشن ناکام"));
     } finally {
       setLoading(false);
     }
@@ -65,34 +131,43 @@ const Plans = () => {
           <span className="text-gray-300 font-semibold">Plans</span>
           <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-[#0d0a1a] font-black text-sm">U</div>
         </div>
+        <div className="mt-3 bg-black/30 rounded-2xl p-3 text-center border border-white/5">
+          <p className="text-[10px] text-gray-500">Your Balance</p>
+          <p className="text-yellow-500 font-black text-2xl">PKR {balance.toLocaleString()}</p>
+        </div>
       </div>
 
       <div className="px-4 mt-4">
         <h2 className="text-xl font-black">Investment Plans</h2>
-        <p className="text-gray-500 text-xs">Choose a plan that fits your goals</p>
+        <p className="text-gray-500 text-xs">بیلنس سے پیکج ایکٹیو کریں — خودکار کٹوتی</p>
       </div>
 
       <div className="px-4 mt-4 space-y-4">
-        {plans.map((plan, index) => {
+        {defaultPlans.map((plan, index) => {
           const Icon = iconMap[plan.icon] || Star;
+          const isActive = dbPlans.some(dp => dp.name === plan.name && activeSubs.includes(dp.id));
           return (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`relative bg-gradient-to-b from-[#2d1b69] to-[#1a1035] rounded-3xl p-5 border ${plan.featured ? 'border-yellow-500/50' : 'border-purple-500/20'} shadow-xl`}
+              className={`relative bg-gradient-to-b from-[#2d1b69] to-[#1a1035] rounded-3xl p-5 border ${isActive ? 'border-green-500/50' : plan.featured ? 'border-yellow-500/50' : 'border-purple-500/20'} shadow-xl`}
             >
-              {plan.featured && (
+              {isActive && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase flex items-center gap-1">
+                  <CheckCircle size={12} /> Active
+                </div>
+              )}
+              {!isActive && plan.featured && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-[#0d0a1a] text-[10px] font-black px-4 py-1 rounded-full uppercase">
                   Most Popular
                 </div>
               )}
 
-              {/* Plan Header */}
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${plan.featured ? 'bg-yellow-500' : 'bg-purple-500/20'}`}>
-                  <Icon size={24} className={plan.featured ? 'text-[#0d0a1a]' : 'text-yellow-500'} />
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isActive ? 'bg-green-500' : plan.featured ? 'bg-yellow-500' : 'bg-purple-500/20'}`}>
+                  <Icon size={24} className={isActive || plan.featured ? 'text-[#0d0a1a]' : 'text-yellow-500'} />
                 </div>
                 <div>
                   <h3 className="font-black text-lg">{plan.name}</h3>
@@ -100,7 +175,6 @@ const Plans = () => {
                 </div>
               </div>
 
-              {/* Stats Row */}
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
                   <p className="text-[9px] text-gray-500 uppercase">Daily</p>
@@ -118,7 +192,6 @@ const Plans = () => {
                 </div>
               </div>
 
-              {/* Features */}
               <div className="space-y-1.5 mb-4">
                 {['Daily profit payout', '24/7 withdrawal', 'Referral bonus'].map(f => (
                   <p key={f} className="text-xs text-gray-400 flex items-center gap-2">
@@ -128,48 +201,62 @@ const Plans = () => {
               </div>
 
               <button
-                onClick={() => setSelectedPlan(plan)}
+                onClick={() => isActive ? null : handleActivate(plan)}
+                disabled={isActive}
                 className={`w-full py-3.5 rounded-2xl font-black text-sm active:scale-95 transition-transform ${
-                  plan.featured
-                    ? 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20'
-                    : 'bg-yellow-500 text-[#0d0a1a]'
+                  isActive
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default'
+                    : balance >= plan.pkr
+                      ? 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20'
+                      : 'bg-gray-700 text-gray-400'
                 }`}
               >
-                Activate Plan
+                {isActive ? '✅ Active' : balance >= plan.pkr ? 'Activate Plan' : `Deposit Required (PKR ${plan.pkr})`}
               </button>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Payment Modal */}
+      {/* Confirmation Modal */}
       {selectedPlan && (
         <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-5 z-50 backdrop-blur-sm">
-          <div className="bg-[#1a1035] border border-purple-500/30 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+            className="bg-[#1a1035] border border-purple-500/30 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
             <button onClick={() => setSelectedPlan(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X size={24} /></button>
             <div className="text-center mb-5">
-              <h3 className="text-xl font-black text-yellow-500">{selectedPlan.name} Plan</h3>
-              <p className="text-xs text-gray-500 mt-1">رقم بھیجیں اور اسکرین شاٹ لگائیں</p>
-            </div>
-            <div className="bg-black/30 p-4 rounded-2xl text-center mb-4 border border-white/5">
-              <p className="text-[10px] text-gray-500 mb-1">نمبر: 03037264598</p>
-              <button onClick={copyNumber} className="bg-yellow-500/20 text-yellow-500 text-[10px] px-4 py-1 rounded-full border border-yellow-500/30 mb-2">
-                {copied ? "Copied ✅" : "Copy Number"}
-              </button>
-              <p className="text-[10px] text-gray-500">Ahmad Nafees Anjum</p>
-              <p className="text-yellow-500 font-black text-lg mt-2">PKR {selectedPlan.pkr.toLocaleString()}</p>
-            </div>
-            <div className="space-y-3">
-              <div className="relative border-2 border-dashed border-white/10 rounded-2xl p-4 text-center cursor-pointer">
-                <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" />
-                <p className="text-[10px] text-gray-500">{file ? `✅ ${file.name}` : "اسکرین شاٹ یہاں اپ لوڈ کریں"}</p>
+              <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <Crown size={32} className="text-[#0d0a1a]" />
               </div>
-              <button onClick={handleConfirmDeposit} disabled={loading}
-                className={`w-full py-4 rounded-2xl font-black text-sm transition-all ${loading ? 'bg-gray-700 opacity-50' : 'bg-yellow-500 text-[#0d0a1a] shadow-lg'}`}>
-                {loading ? "Processing..." : "Confirm Payment"}
+              <h3 className="text-xl font-black text-yellow-500">{selectedPlan.name} Plan</h3>
+              <p className="text-xs text-gray-500 mt-1">پیکج ایکٹیو کرنے کی تصدیق</p>
+            </div>
+            
+            <div className="bg-black/30 p-4 rounded-2xl mb-4 border border-white/5 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">پیکج قیمت</span>
+                <span className="text-yellow-500 font-black">PKR {selectedPlan.pkr.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">آپ کا بیلنس</span>
+                <span className="text-green-400 font-black">PKR {balance.toLocaleString()}</span>
+              </div>
+              <div className="border-t border-white/10 pt-2 flex justify-between text-sm">
+                <span className="text-gray-500">باقی بیلنس</span>
+                <span className="text-white font-black">PKR {(balance - selectedPlan.pkr).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <button onClick={confirmActivation} disabled={loading}
+                className={`w-full py-4 rounded-2xl font-black text-sm transition-all ${loading ? 'bg-gray-700 opacity-50' : 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20 active:scale-95'}`}>
+                {loading ? "Processing..." : "✅ تصدیق کریں — ایکٹیو کریں"}
+              </button>
+              <button onClick={() => setSelectedPlan(null)} className="w-full py-3 rounded-2xl text-sm text-gray-500 bg-white/5 border border-white/5">
+                منسوخ کریں
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>
