@@ -15,13 +15,13 @@ const Plans = () => {
 
   const iconMap: Record<string, any> = { Star, TrendingUp, Gem, Crown, Sparkles };
 
-  const defaultPlans = [
-    { name: "Starter", price: 2, pkr: 600, daily: 0.15, totalReturn: 9, duration: 60, ads: 5, icon: "Star", featured: false },
-    { name: "Growth", price: 10, pkr: 2800, daily: 0.50, totalReturn: 30, duration: 60, ads: 10, icon: "TrendingUp", featured: true },
-    { name: "Silver", price: 6, pkr: 1800, daily: 0.35, totalReturn: 21, duration: 60, ads: 8, icon: "Sparkles", featured: false },
-    { name: "Gold", price: 25, pkr: 7000, daily: 1.25, totalReturn: 75, duration: 60, ads: 15, icon: "Gem", featured: false },
-    { name: "Platinum", price: 50, pkr: 14000, daily: 2.50, totalReturn: 150, duration: 60, ads: 20, icon: "Crown", featured: false },
-  ];
+  const planMeta: Record<string, { icon: string; featured: boolean; priceUsd: number; dailyUsd: number; totalUsd: number }> = {
+    "Starter": { icon: "Star", featured: false, priceUsd: 2, dailyUsd: 0.15, totalUsd: 9 },
+    "Growth": { icon: "TrendingUp", featured: true, priceUsd: 10, dailyUsd: 0.50, totalUsd: 30 },
+    "Silver": { icon: "Sparkles", featured: false, priceUsd: 6, dailyUsd: 0.35, totalUsd: 21 },
+    "Gold": { icon: "Gem", featured: false, priceUsd: 25, dailyUsd: 1.25, totalUsd: 75 },
+    "Platinum": { icon: "Crown", featured: false, priceUsd: 50, dailyUsd: 2.50, totalUsd: 150 },
+  };
 
   useEffect(() => {
     fetchData();
