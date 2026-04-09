@@ -15,13 +15,13 @@ const Plans = () => {
 
   const iconMap: Record<string, any> = { Star, TrendingUp, Gem, Crown, Sparkles };
 
-  const defaultPlans = [
-    { name: "Starter", price: 2, pkr: 600, daily: 0.15, totalReturn: 9, duration: 60, ads: 5, icon: "Star", featured: false },
-    { name: "Growth", price: 10, pkr: 2800, daily: 0.50, totalReturn: 30, duration: 60, ads: 10, icon: "TrendingUp", featured: true },
-    { name: "Silver", price: 6, pkr: 1800, daily: 0.35, totalReturn: 21, duration: 60, ads: 8, icon: "Sparkles", featured: false },
-    { name: "Gold", price: 25, pkr: 7000, daily: 1.25, totalReturn: 75, duration: 60, ads: 15, icon: "Gem", featured: false },
-    { name: "Platinum", price: 50, pkr: 14000, daily: 2.50, totalReturn: 150, duration: 60, ads: 20, icon: "Crown", featured: false },
-  ];
+  const planMeta: Record<string, { icon: string; featured: boolean; priceUsd: number; dailyUsd: number; totalUsd: number }> = {
+    "Starter": { icon: "Star", featured: false, priceUsd: 2, dailyUsd: 0.15, totalUsd: 9 },
+    "Growth": { icon: "TrendingUp", featured: true, priceUsd: 10, dailyUsd: 0.50, totalUsd: 30 },
+    "Silver": { icon: "Sparkles", featured: false, priceUsd: 6, dailyUsd: 0.35, totalUsd: 21 },
+    "Gold": { icon: "Gem", featured: false, priceUsd: 25, dailyUsd: 1.25, totalUsd: 75 },
+    "Platinum": { icon: "Crown", featured: false, priceUsd: 50, dailyUsd: 2.50, totalUsd: 150 },
+  };
 
   useEffect(() => {
     fetchData();
@@ -41,8 +41,7 @@ const Plans = () => {
     if (plans) setDbPlans(plans);
   };
 
-  const handleActivate = async (plan: any) => {
-    // Re-fetch fresh balance from DB
+  const handleActivate = async (dbPlan: any) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast({ title: "خرابی", description: "پہلے لاگ ان کریں", variant: "destructive" }); return; }
 
@@ -50,11 +49,11 @@ const Plans = () => {
     const freshBalance = profile?.balance || 0;
     setBalance(freshBalance);
 
-    if (freshBalance < plan.pkr) {
+    if (freshBalance < dbPlan.price) {
       toast({ title: "بیلنس کم ہے! ❌", description: `آپ کا بیلنس PKR ${freshBalance} ہے۔ پہلے ڈپازٹ کریں۔`, variant: "destructive" });
       return;
     }
-    setSelectedPlan(plan);
+    setSelectedPlan(dbPlan);
   };
 
   const confirmActivation = async () => {
@@ -64,37 +63,19 @@ const Plans = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("لاگ ان ہونا ضروری ہے");
 
-      // Re-fetch fresh balance to avoid stale data
       const { data: freshProfile } = await supabase.from('profiles').select('balance').eq('id', user.id).maybeSingle();
       const freshBalance = freshProfile?.balance || 0;
 
-      if (freshBalance < selectedPlan.pkr) {
+      if (freshBalance < selectedPlan.price) {
         toast({ title: "بیلنس کم ہے! ❌", description: `آپ کا بیلنس PKR ${freshBalance} ہے۔`, variant: "destructive" });
         setSelectedPlan(null);
         setLoading(false);
         return;
       }
 
-      // Find or create plan in DB
-      let planId: string;
-      const existingPlan = dbPlans.find(p => p.name === selectedPlan.name);
-      if (existingPlan) {
-        planId = existingPlan.id;
-      } else {
-        const { data: newPlan, error: planErr } = await supabase.from('plans').insert([{
-          name: selectedPlan.name,
-          price: selectedPlan.pkr,
-          daily_earning: Math.round(selectedPlan.daily * 280),
-          duration_days: selectedPlan.duration,
-          daily_ads: selectedPlan.ads,
-        }]).select().single();
-        if (planErr) throw planErr;
-        planId = newPlan.id;
-      }
-
       // Check if already subscribed
       const { data: existingSub } = await supabase.from('subscriptions')
-        .select('id').eq('user_id', user.id).eq('plan_id', planId).eq('is_active', true).maybeSingle();
+        .select('id').eq('user_id', user.id).eq('plan_id', selectedPlan.id).eq('is_active', true).maybeSingle();
       if (existingSub) {
         toast({ title: "پہلے سے ایکٹیو ✅", description: "یہ پیکج پہلے سے ایکٹیو ہے!" });
         setSelectedPlan(null);
@@ -102,8 +83,8 @@ const Plans = () => {
         return;
       }
 
-      // Deduct balance using fresh value
-      const newBalance = freshBalance - selectedPlan.pkr;
+      // Deduct balance
+      const newBalance = freshBalance - selectedPlan.price;
       const { error: balErr } = await supabase.from('profiles')
         .update({ balance: newBalance })
         .eq('id', user.id);
@@ -111,11 +92,11 @@ const Plans = () => {
 
       // Create subscription
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + selectedPlan.duration);
+      expiresAt.setDate(expiresAt.getDate() + selectedPlan.duration_days);
       
       const { error: subErr } = await supabase.from('subscriptions').insert([{
         user_id: user.id,
-        plan_id: planId,
+        plan_id: selectedPlan.id,
         started_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString(),
         is_active: true,
@@ -126,13 +107,12 @@ const Plans = () => {
       await supabase.from('transactions').insert([{
         user_id: user.id,
         type: 'plan_purchase',
-        amount: selectedPlan.pkr,
-        description: `${selectedPlan.name} Plan activated - PKR ${selectedPlan.pkr}`,
+        amount: selectedPlan.price,
+        description: `${selectedPlan.name} Plan activated - PKR ${selectedPlan.price}`,
       }]);
 
-      toast({ title: `${selectedPlan.name} ایکٹیو ✅`, description: `PKR ${selectedPlan.pkr} بیلنس سے کٹوتی ہوئی۔` });
+      toast({ title: `${selectedPlan.name} ایکٹیو ✅`, description: `PKR ${selectedPlan.price} بیلنس سے کٹوتی ہوئی۔` });
       setSelectedPlan(null);
-      // Redirect to dashboard
       navigate('/dashboard');
     } catch (error: any) {
       toast({ title: "خرابی ❌", description: error.message || "ایکٹیویشن ناکام", variant: "destructive" });
@@ -161,43 +141,44 @@ const Plans = () => {
       </div>
 
       <div className="px-4 mt-4 space-y-4">
-        {defaultPlans.map((plan, index) => {
-          const Icon = iconMap[plan.icon] || Star;
-          const isActive = dbPlans.some(dp => dp.name === plan.name && activeSubs.includes(dp.id));
+        {dbPlans.map((plan, index) => {
+          const meta = planMeta[plan.name] || { icon: "Star", featured: false, priceUsd: 0, dailyUsd: 0, totalUsd: 0 };
+          const Icon = iconMap[meta.icon] || Star;
+          const isActive = activeSubs.includes(plan.id);
           return (
-            <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
-              className={`relative bg-gradient-to-b from-[#2d1b69] to-[#1a1035] rounded-3xl p-5 border ${isActive ? 'border-green-500/50' : plan.featured ? 'border-yellow-500/50' : 'border-purple-500/20'} shadow-xl`}>
+            <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
+              className={`relative bg-gradient-to-b from-[#2d1b69] to-[#1a1035] rounded-3xl p-5 border ${isActive ? 'border-green-500/50' : meta.featured ? 'border-yellow-500/50' : 'border-purple-500/20'} shadow-xl`}>
               {isActive && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase flex items-center gap-1">
                   <CheckCircle size={12} /> Active
                 </div>
               )}
-              {!isActive && plan.featured && (
+              {!isActive && meta.featured && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-[#0d0a1a] text-[10px] font-black px-4 py-1 rounded-full uppercase">Most Popular</div>
               )}
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isActive ? 'bg-green-500' : plan.featured ? 'bg-yellow-500' : 'bg-purple-500/20'}`}>
-                  <Icon size={24} className={isActive || plan.featured ? 'text-[#0d0a1a]' : 'text-yellow-500'} />
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isActive ? 'bg-green-500' : meta.featured ? 'bg-yellow-500' : 'bg-purple-500/20'}`}>
+                  <Icon size={24} className={isActive || meta.featured ? 'text-[#0d0a1a]' : 'text-yellow-500'} />
                 </div>
                 <div>
                   <h3 className="font-black text-lg">{plan.name}</h3>
-                  <p className="text-yellow-500 font-black text-xl">${plan.price} <span className="text-gray-500 text-xs font-normal">/ Rs. {plan.pkr.toLocaleString()}</span></p>
+                  <p className="text-yellow-500 font-black text-xl">${meta.priceUsd} <span className="text-gray-500 text-xs font-normal">/ Rs. {plan.price.toLocaleString()}</span></p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
                   <p className="text-[9px] text-gray-500 uppercase">Daily</p>
-                  <p className="text-green-400 font-black text-sm">${plan.daily.toFixed(2)}</p>
-                  <p className="text-[9px] text-gray-600">Rs. {(plan.daily * 280).toFixed(0)}</p>
+                  <p className="text-green-400 font-black text-sm">${meta.dailyUsd.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600">Rs. {plan.daily_earning}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
                   <p className="text-[9px] text-gray-500 uppercase">Total</p>
-                  <p className="text-green-400 font-black text-sm">${plan.totalReturn.toFixed(2)}</p>
-                  <p className="text-[9px] text-gray-600">Rs. {(plan.totalReturn * 280).toFixed(0)}</p>
+                  <p className="text-green-400 font-black text-sm">${meta.totalUsd.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600">Rs. {(plan.daily_earning * plan.duration_days).toLocaleString()}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
                   <p className="text-[9px] text-gray-500 uppercase">Duration</p>
-                  <p className="text-white font-black text-sm">{plan.duration} days</p>
+                  <p className="text-white font-black text-sm">{plan.duration_days} days</p>
                 </div>
               </div>
               <div className="space-y-1.5 mb-4">
@@ -208,10 +189,10 @@ const Plans = () => {
               <button onClick={() => isActive ? null : handleActivate(plan)} disabled={isActive}
                 className={`w-full py-3.5 rounded-2xl font-black text-sm active:scale-95 transition-transform ${
                   isActive ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default'
-                    : balance >= plan.pkr ? 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20'
+                    : balance >= plan.price ? 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20'
                     : 'bg-gray-700 text-gray-400'
                 }`}>
-                {isActive ? '✅ Active' : balance >= plan.pkr ? 'Activate Plan' : `Deposit Required (PKR ${plan.pkr})`}
+                {isActive ? '✅ Active' : balance >= plan.price ? 'Activate Plan' : `Deposit Required (PKR ${plan.price})`}
               </button>
             </motion.div>
           );
@@ -234,7 +215,7 @@ const Plans = () => {
             <div className="bg-black/30 p-4 rounded-2xl mb-4 border border-white/5 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">پیکج قیمت</span>
-                <span className="text-yellow-500 font-black">PKR {selectedPlan.pkr.toLocaleString()}</span>
+                <span className="text-yellow-500 font-black">PKR {selectedPlan.price.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">آپ کا بیلنس</span>
@@ -242,7 +223,7 @@ const Plans = () => {
               </div>
               <div className="border-t border-white/10 pt-2 flex justify-between text-sm">
                 <span className="text-gray-500">باقی بیلنس</span>
-                <span className="text-white font-black">PKR {(balance - selectedPlan.pkr).toLocaleString()}</span>
+                <span className="text-white font-black">PKR {(balance - selectedPlan.price).toLocaleString()}</span>
               </div>
             </div>
             <div className="space-y-2">
