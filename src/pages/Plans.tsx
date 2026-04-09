@@ -41,8 +41,7 @@ const Plans = () => {
     if (plans) setDbPlans(plans);
   };
 
-  const handleActivate = async (plan: any) => {
-    // Re-fetch fresh balance from DB
+  const handleActivate = async (dbPlan: any) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast({ title: "خرابی", description: "پہلے لاگ ان کریں", variant: "destructive" }); return; }
 
@@ -50,11 +49,11 @@ const Plans = () => {
     const freshBalance = profile?.balance || 0;
     setBalance(freshBalance);
 
-    if (freshBalance < plan.pkr) {
+    if (freshBalance < dbPlan.price) {
       toast({ title: "بیلنس کم ہے! ❌", description: `آپ کا بیلنس PKR ${freshBalance} ہے۔ پہلے ڈپازٹ کریں۔`, variant: "destructive" });
       return;
     }
-    setSelectedPlan(plan);
+    setSelectedPlan(dbPlan);
   };
 
   const confirmActivation = async () => {
