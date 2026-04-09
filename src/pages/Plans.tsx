@@ -215,7 +215,7 @@ const Plans = () => {
             <div className="bg-black/30 p-4 rounded-2xl mb-4 border border-white/5 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">پیکج قیمت</span>
-                <span className="text-yellow-500 font-black">PKR {selectedPlan.pkr.toLocaleString()}</span>
+                <span className="text-yellow-500 font-black">PKR {selectedPlan.price.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">آپ کا بیلنس</span>
@@ -223,7 +223,7 @@ const Plans = () => {
               </div>
               <div className="border-t border-white/10 pt-2 flex justify-between text-sm">
                 <span className="text-gray-500">باقی بیلنس</span>
-                <span className="text-white font-black">PKR {(balance - selectedPlan.pkr).toLocaleString()}</span>
+                <span className="text-white font-black">PKR {(balance - selectedPlan.price).toLocaleString()}</span>
               </div>
             </div>
             <div className="space-y-2">
