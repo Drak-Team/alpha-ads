@@ -63,37 +63,19 @@ const Plans = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("لاگ ان ہونا ضروری ہے");
 
-      // Re-fetch fresh balance to avoid stale data
       const { data: freshProfile } = await supabase.from('profiles').select('balance').eq('id', user.id).maybeSingle();
       const freshBalance = freshProfile?.balance || 0;
 
-      if (freshBalance < selectedPlan.pkr) {
+      if (freshBalance < selectedPlan.price) {
         toast({ title: "بیلنس کم ہے! ❌", description: `آپ کا بیلنس PKR ${freshBalance} ہے۔`, variant: "destructive" });
         setSelectedPlan(null);
         setLoading(false);
         return;
       }
 
-      // Find or create plan in DB
-      let planId: string;
-      const existingPlan = dbPlans.find(p => p.name === selectedPlan.name);
-      if (existingPlan) {
-        planId = existingPlan.id;
-      } else {
-        const { data: newPlan, error: planErr } = await supabase.from('plans').insert([{
-          name: selectedPlan.name,
-          price: selectedPlan.pkr,
-          daily_earning: Math.round(selectedPlan.daily * 280),
-          duration_days: selectedPlan.duration,
-          daily_ads: selectedPlan.ads,
-        }]).select().single();
-        if (planErr) throw planErr;
-        planId = newPlan.id;
-      }
-
       // Check if already subscribed
       const { data: existingSub } = await supabase.from('subscriptions')
-        .select('id').eq('user_id', user.id).eq('plan_id', planId).eq('is_active', true).maybeSingle();
+        .select('id').eq('user_id', user.id).eq('plan_id', selectedPlan.id).eq('is_active', true).maybeSingle();
       if (existingSub) {
         toast({ title: "پہلے سے ایکٹیو ✅", description: "یہ پیکج پہلے سے ایکٹیو ہے!" });
         setSelectedPlan(null);
@@ -101,8 +83,8 @@ const Plans = () => {
         return;
       }
 
-      // Deduct balance using fresh value
-      const newBalance = freshBalance - selectedPlan.pkr;
+      // Deduct balance
+      const newBalance = freshBalance - selectedPlan.price;
       const { error: balErr } = await supabase.from('profiles')
         .update({ balance: newBalance })
         .eq('id', user.id);
@@ -110,11 +92,11 @@ const Plans = () => {
 
       // Create subscription
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + selectedPlan.duration);
+      expiresAt.setDate(expiresAt.getDate() + selectedPlan.duration_days);
       
       const { error: subErr } = await supabase.from('subscriptions').insert([{
         user_id: user.id,
-        plan_id: planId,
+        plan_id: selectedPlan.id,
         started_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString(),
         is_active: true,
@@ -125,13 +107,12 @@ const Plans = () => {
       await supabase.from('transactions').insert([{
         user_id: user.id,
         type: 'plan_purchase',
-        amount: selectedPlan.pkr,
-        description: `${selectedPlan.name} Plan activated - PKR ${selectedPlan.pkr}`,
+        amount: selectedPlan.price,
+        description: `${selectedPlan.name} Plan activated - PKR ${selectedPlan.price}`,
       }]);
 
-      toast({ title: `${selectedPlan.name} ایکٹیو ✅`, description: `PKR ${selectedPlan.pkr} بیلنس سے کٹوتی ہوئی۔` });
+      toast({ title: `${selectedPlan.name} ایکٹیو ✅`, description: `PKR ${selectedPlan.price} بیلنس سے کٹوتی ہوئی۔` });
       setSelectedPlan(null);
-      // Redirect to dashboard
       navigate('/dashboard');
     } catch (error: any) {
       toast({ title: "خرابی ❌", description: error.message || "ایکٹیویشن ناکام", variant: "destructive" });
