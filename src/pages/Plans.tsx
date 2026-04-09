@@ -141,43 +141,44 @@ const Plans = () => {
       </div>
 
       <div className="px-4 mt-4 space-y-4">
-        {defaultPlans.map((plan, index) => {
-          const Icon = iconMap[plan.icon] || Star;
-          const isActive = dbPlans.some(dp => dp.name === plan.name && activeSubs.includes(dp.id));
+        {dbPlans.map((plan, index) => {
+          const meta = planMeta[plan.name] || { icon: "Star", featured: false, priceUsd: 0, dailyUsd: 0, totalUsd: 0 };
+          const Icon = iconMap[meta.icon] || Star;
+          const isActive = activeSubs.includes(plan.id);
           return (
-            <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
-              className={`relative bg-gradient-to-b from-[#2d1b69] to-[#1a1035] rounded-3xl p-5 border ${isActive ? 'border-green-500/50' : plan.featured ? 'border-yellow-500/50' : 'border-purple-500/20'} shadow-xl`}>
+            <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
+              className={`relative bg-gradient-to-b from-[#2d1b69] to-[#1a1035] rounded-3xl p-5 border ${isActive ? 'border-green-500/50' : meta.featured ? 'border-yellow-500/50' : 'border-purple-500/20'} shadow-xl`}>
               {isActive && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase flex items-center gap-1">
                   <CheckCircle size={12} /> Active
                 </div>
               )}
-              {!isActive && plan.featured && (
+              {!isActive && meta.featured && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-[#0d0a1a] text-[10px] font-black px-4 py-1 rounded-full uppercase">Most Popular</div>
               )}
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isActive ? 'bg-green-500' : plan.featured ? 'bg-yellow-500' : 'bg-purple-500/20'}`}>
-                  <Icon size={24} className={isActive || plan.featured ? 'text-[#0d0a1a]' : 'text-yellow-500'} />
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isActive ? 'bg-green-500' : meta.featured ? 'bg-yellow-500' : 'bg-purple-500/20'}`}>
+                  <Icon size={24} className={isActive || meta.featured ? 'text-[#0d0a1a]' : 'text-yellow-500'} />
                 </div>
                 <div>
                   <h3 className="font-black text-lg">{plan.name}</h3>
-                  <p className="text-yellow-500 font-black text-xl">${plan.price} <span className="text-gray-500 text-xs font-normal">/ Rs. {plan.pkr.toLocaleString()}</span></p>
+                  <p className="text-yellow-500 font-black text-xl">${meta.priceUsd} <span className="text-gray-500 text-xs font-normal">/ Rs. {plan.price.toLocaleString()}</span></p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
                   <p className="text-[9px] text-gray-500 uppercase">Daily</p>
-                  <p className="text-green-400 font-black text-sm">${plan.daily.toFixed(2)}</p>
-                  <p className="text-[9px] text-gray-600">Rs. {(plan.daily * 280).toFixed(0)}</p>
+                  <p className="text-green-400 font-black text-sm">${meta.dailyUsd.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600">Rs. {plan.daily_earning}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
                   <p className="text-[9px] text-gray-500 uppercase">Total</p>
-                  <p className="text-green-400 font-black text-sm">${plan.totalReturn.toFixed(2)}</p>
-                  <p className="text-[9px] text-gray-600">Rs. {(plan.totalReturn * 280).toFixed(0)}</p>
+                  <p className="text-green-400 font-black text-sm">${meta.totalUsd.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600">Rs. {(plan.daily_earning * plan.duration_days).toLocaleString()}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-3 text-center border border-white/5">
                   <p className="text-[9px] text-gray-500 uppercase">Duration</p>
-                  <p className="text-white font-black text-sm">{plan.duration} days</p>
+                  <p className="text-white font-black text-sm">{plan.duration_days} days</p>
                 </div>
               </div>
               <div className="space-y-1.5 mb-4">
@@ -188,10 +189,10 @@ const Plans = () => {
               <button onClick={() => isActive ? null : handleActivate(plan)} disabled={isActive}
                 className={`w-full py-3.5 rounded-2xl font-black text-sm active:scale-95 transition-transform ${
                   isActive ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default'
-                    : balance >= plan.pkr ? 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20'
+                    : balance >= plan.price ? 'bg-yellow-500 text-[#0d0a1a] shadow-lg shadow-yellow-500/20'
                     : 'bg-gray-700 text-gray-400'
                 }`}>
-                {isActive ? '✅ Active' : balance >= plan.pkr ? 'Activate Plan' : `Deposit Required (PKR ${plan.pkr})`}
+                {isActive ? '✅ Active' : balance >= plan.price ? 'Activate Plan' : `Deposit Required (PKR ${plan.price})`}
               </button>
             </motion.div>
           );
