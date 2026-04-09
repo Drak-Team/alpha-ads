@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, CheckCircle2, ArrowLeft, Lock } from 'lucide-react';
+import { PlayCircle, CheckCircle2, ArrowLeft, Lock, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const Ads = () => {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ const Ads = () => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [completedAds, setCompletedAds] = useState<number[]>([]);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [dailyEarning, setDailyEarning] = useState(0);
+  const [earningClaimed, setEarningClaimed] = useState(false);
 
   const adLinks = [
     "https://www.effectivegatecpm.com/zgqrwada?key=9398177c3e5719a4d92526978565df4f",
@@ -25,15 +28,26 @@ const Ads = () => {
     const checkPackage = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
-      const { data: sub } = await supabase.from('subscriptions').select('id').eq('user_id', user.id).eq('is_active', true).maybeSingle();
-      if (sub) { setHasActivePackage(true); }
-      else {
-        const { data: dep } = await supabase.from('deposits').select('id').eq('user_id', user.id).eq('status', 'approved').maybeSingle();
-        if (dep) setHasActivePackage(true);
+
+      // Check active subscription and get daily earning
+      const { data: sub } = await supabase.from('subscriptions')
+        .select('id, plan_id, plans(daily_earning)')
+        .eq('user_id', user.id).eq('is_active', true).maybeSingle();
+
+      if (sub) {
+        setHasActivePackage(true);
+        setDailyEarning((sub.plans as any)?.daily_earning || 0);
       }
+
       const today = new Date().toISOString().split('T')[0];
-      const { data: adData } = await supabase.from('ad_watches').select('ads_completed, all_completed').eq('user_id', user.id).eq('watched_date', today).maybeSingle();
-      if (adData) setCompletedAds(Array.from({ length: adData.ads_completed }, (_, i) => i));
+      const { data: adData } = await supabase.from('ad_watches')
+        .select('ads_completed, all_completed, earning_claimed')
+        .eq('user_id', user.id).eq('watched_date', today).maybeSingle();
+
+      if (adData) {
+        setCompletedAds(Array.from({ length: adData.ads_completed }, (_, i) => i));
+        setEarningClaimed(adData.earning_claimed || false);
+      }
       setLoading(false);
     };
     checkPackage();
@@ -65,6 +79,41 @@ const Ads = () => {
     else await supabase.from('ad_watches').insert({ user_id: user.id, watched_date: today, ads_completed: count, all_completed: allDone });
   };
 
+  const claimDailyEarning = async () => {
+    if (earningClaimed || completedAds.length < 6 || dailyEarning <= 0) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get fresh balance
+      const { data: profile } = await supabase.from('profiles').select('balance, total_earned').eq('id', user.id).maybeSingle();
+      if (!profile) return;
+
+      // Add daily earning to balance
+      const { error: balErr } = await supabase.from('profiles').update({
+        balance: profile.balance + dailyEarning,
+        total_earned: profile.total_earned + dailyEarning,
+      }).eq('id', user.id);
+      if (balErr) throw balErr;
+
+      // Mark earning as claimed
+      const today = new Date().toISOString().split('T')[0];
+      await supabase.from('ad_watches').update({ earning_claimed: true })
+        .eq('user_id', user.id).eq('watched_date', today);
+
+      // Log transaction
+      await supabase.from('transactions').insert({
+        user_id: user.id, type: 'daily_earning', amount: dailyEarning,
+        description: `Daily ad earning claimed - PKR ${dailyEarning}`
+      });
+
+      setEarningClaimed(true);
+      toast({ title: "روزانہ کمائی وصول ✅", description: `PKR ${dailyEarning} آپ کے بیلنس میں شامل ہو گئی!` });
+    } catch (err: any) {
+      toast({ title: "خرابی", description: err.message, variant: "destructive" });
+    }
+  };
+
   if (loading) return <div className="min-h-screen bg-[#0d0a1a] flex items-center justify-center text-white">Loading...</div>;
 
   if (!hasActivePackage) {
@@ -74,13 +123,13 @@ const Ads = () => {
           <div className="bg-orange-500/20 p-5 rounded-full inline-block mb-6 text-orange-500 animate-pulse"><Lock size={48} /></div>
           <h2 className="text-2xl font-black mb-4 text-yellow-500">Start Earning! 🚀</h2>
           <p className="text-sm text-gray-400 mb-8">پیسے کمانے کے لیے اپنا پیکج ایکٹو کریں</p>
-          <button onClick={() => navigate('/plans')} className="w-full bg-yellow-500 text-[#0d0a1a] py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-transform">
-            View Plans
-          </button>
+          <button onClick={() => navigate('/plans')} className="w-full bg-yellow-500 text-[#0d0a1a] py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-transform">View Plans</button>
         </div>
       </div>
     );
   }
+
+  const allDone = completedAds.length >= 6;
 
   return (
     <div className="min-h-screen bg-[#0d0a1a] text-white p-4 pb-28">
@@ -89,6 +138,28 @@ const Ads = () => {
         <h2 className="text-xl font-black text-yellow-500">DAILY ADS ({completedAds.length}/6)</h2>
         <div className="w-10" />
       </div>
+
+      {/* Daily Earning Card */}
+      {dailyEarning > 0 && (
+        <div className={`mx-0 mb-4 p-4 rounded-2xl border ${allDone && !earningClaimed ? 'border-green-500/30 bg-green-500/10' : 'border-purple-500/20 bg-[#1a1035]'}`}>
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-[10px] text-gray-500">آج کی کمائی</p>
+              <p className="text-xl font-black text-green-400">PKR {dailyEarning}</p>
+            </div>
+            {allDone && !earningClaimed ? (
+              <button onClick={claimDailyEarning}
+                className="bg-green-500 text-white px-5 py-2.5 rounded-xl font-black text-sm flex items-center gap-2 active:scale-95 transition-transform">
+                <Gift size={16} /> وصول کریں
+              </button>
+            ) : earningClaimed ? (
+              <span className="text-green-500 font-bold text-sm flex items-center gap-1"><CheckCircle2 size={16} /> وصول شدہ</span>
+            ) : (
+              <span className="text-gray-600 text-[10px]">6 ایڈز مکمل کریں</span>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-3">
         {adLinks.map((link, index) => {
@@ -117,9 +188,7 @@ const Ads = () => {
             <span className="text-2xl font-black">{timeLeft}s</span>
           </div>
           <iframe src={adLinks[activeAdIndex]} className="flex-1 w-full border-none" title="Advertisement" />
-          <div className="p-4 bg-[#0d0a1a] text-center text-xs text-yellow-500/60">
-            Wait {timeLeft} seconds to earn reward
-          </div>
+          <div className="p-4 bg-[#0d0a1a] text-center text-xs text-yellow-500/60">Wait {timeLeft} seconds to earn reward</div>
         </div>
       )}
     </div>
